@@ -212,7 +212,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 <div class="side-controls" id="sideControls">
   <div class="ctrl-btn" id="compassBtn"><svg class="compass-svg" id="compassSvg" width="22" height="22" viewBox="0 0 40 40"><polygon points="20,4 24.5,20 20,17 15.5,20" fill="#ff3b30"/><polygon points="20,36 15.5,20 20,23 24.5,20" fill="#c7c7cc"/></svg></div>
   <div class="ctrl-btn" id="recenterBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg></div>
-  <div class="ctrl-btn" id="trafficBtn" title="תנועה חיה" style="position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2.2"><circle cx="12" cy="5" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="19" r="2.5"/><rect x="8" y="1" width="8" height="22" rx="2" stroke="#34c759" fill="none"/></svg></div>
+  <div class="ctrl-btn" id="trafficBtn" title="תנועה חיה" style="position:relative"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 14h14l-1.5-4h-11L5 14z" fill="#34c759" stroke="#34c759" stroke-width="1" stroke-linejoin="round"/><rect x="5" y="14" width="14" height="4" rx="1.5" fill="#2db54c" stroke="#2db54c"/><circle cx="7.5" cy="18" r="1.5" fill="#1a1a1a"/><circle cx="16.5" cy="18" r="1.5" fill="#1a1a1a"/><path d="M17 7.5a3.5 3.5 0 013 1.7" stroke="#ff9500" stroke-width="1.5" stroke-linecap="round"/><path d="M17 4.5a6.5 6.5 0 015.5 3" stroke="#ff3b30" stroke-width="1.5" stroke-linecap="round"/></svg></div>
 </div>
 
 <div id="map"></div>
@@ -357,10 +357,28 @@ const App={
     // User marker element
     const el=document.createElement('div');
     el.id='userMarker';
-    el.innerHTML=`<div style="position:relative;width:28px;height:28px">
-      <div style="position:absolute;inset:-6px;border-radius:50%;background:rgba(0,122,255,.1);animation:uRing 2.2s ease-out infinite"></div>
-      <div id="uDir" style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:14px solid #007aff;z-index:3;display:none;filter:drop-shadow(0 1px 3px rgba(0,0,0,.12));transition:transform .3s"></div>
-      <div id="uCore" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:linear-gradient(180deg,#1a8fff,#0066e0);border:3.5px solid white;box-shadow:0 2px 10px rgba(0,122,255,.4);z-index:2;transition:all .5s"></div>
+    el.innerHTML=`<div style="position:relative;width:80px;height:80px">
+      <!-- Google Maps style heading cone -->
+      <div id="uCone" style="position:absolute;top:0;left:50%;transform-origin:50% 50%;transform:translateX(-50%);
+        width:80px;height:80px;display:none;z-index:1;pointer-events:none">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <defs>
+            <radialGradient id="coneGrad" cx="50%" cy="100%" r="80%" fx="50%" fy="100%">
+              <stop offset="0%" stop-color="rgba(66,133,244,0.35)"/>
+              <stop offset="100%" stop-color="rgba(66,133,244,0)"/>
+            </radialGradient>
+          </defs>
+          <path d="M40,40 L15,2 L65,2 Z" fill="url(#coneGrad)"/>
+        </svg>
+      </div>
+      <!-- Pulse ring -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:rgba(66,133,244,.08);animation:uRing 2.2s ease-out infinite"></div>
+      <!-- Core dot -->
+      <div id="uCore" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+        width:22px;height:22px;border-radius:50%;
+        background:linear-gradient(180deg,#4285f4,#1a6dea);
+        border:3px solid white;
+        box-shadow:0 1px 8px rgba(66,133,244,.5),0 0 0 1px rgba(66,133,244,.08);z-index:3;transition:all .5s"></div>
     </div><style>@keyframes uRing{0%{transform:scale(.6);opacity:.7}100%{transform:scale(2.5);opacity:0}}</style>`;
     this.marker=new mapboxgl.Marker({element:el,anchor:'center'}).setLngLat([0,0]);
   },
@@ -371,7 +389,9 @@ const App={
       if(h!==null){
         this.heading=h;DR.setHeading(h);
         const c=document.getElementById('compassSvg');if(c)c.style.transform=`rotate(${h}deg)`;
-        const a=document.getElementById('uDir');if(a){a.style.display='block';a.style.transform=`translateX(-50%) rotate(${h}deg)`}
+        // Rotate heading cone (Google Maps style)
+        const cone=document.getElementById('uCone');
+        if(cone){cone.style.display='block';cone.style.transform=`translateX(-50%) rotate(${h}deg)`}
         // Rotate map when follow-heading is active
         if(this._followHeading&&this.ready){
           this.map.easeTo({bearing:-h,duration:150,easing:t=>t});
