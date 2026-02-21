@@ -294,7 +294,7 @@ const App={
   map:null,marker:null,accCircle:null,routeMode:'driving-traffic',
   wId:null,fbW:null,tracking:false,pos:null,heading:null,
   dest:null,hist:[],sTmr:null,ready:false,firstFix:false,
-  lastGPSTime:0,drMode:false,_drWatchdog:null,
+  lastGPSTime:0,drMode:false,_drWatchdog:null,_followHeading:false,
 
   init(){
     try{
@@ -368,7 +368,15 @@ const App={
   sensors(){
     const goOri=()=>window.addEventListener('deviceorientation',e=>{
       let h=e.webkitCompassHeading!==undefined?e.webkitCompassHeading:e.alpha!==null?(360-e.alpha)%360:null;
-      if(h!==null){this.heading=h;DR.setHeading(h);const c=document.getElementById('compassSvg');if(c)c.style.transform=`rotate(${h}deg)`;const a=document.getElementById('uDir');if(a){a.style.display='block';a.style.transform=`translateX(-50%) rotate(${h}deg)`}}
+      if(h!==null){
+        this.heading=h;DR.setHeading(h);
+        const c=document.getElementById('compassSvg');if(c)c.style.transform=`rotate(${h}deg)`;
+        const a=document.getElementById('uDir');if(a){a.style.display='block';a.style.transform=`translateX(-50%) rotate(${h}deg)`}
+        // Rotate map when follow-heading is active
+        if(this._followHeading&&this.ready){
+          this.map.easeTo({bearing:-h,duration:150,easing:t=>t});
+        }
+      }
     },true);
     const goMotion=()=>window.addEventListener('devicemotion',e=>{
       if(e.accelerationIncludingGravity){const{x,y,z}=e.accelerationIncludingGravity;DR.processAccel(x||0,y||0,z||0);Spoof.processMotion(x||0,y||0,z||0);if(DR.active&&DR.estimated)this.renderDR()}
@@ -581,7 +589,18 @@ const App={
   events(){
     document.getElementById('btnLocate').onclick=()=>this.locate();
     document.getElementById('btnTrack').onclick=()=>this.startTrack();
-    document.getElementById('compassBtn').onclick=()=>this.map.easeTo({bearing:0,pitch:0,duration:500});
+    document.getElementById('compassBtn').onclick=()=>{
+      this._followHeading=!this._followHeading;
+      const btn=document.getElementById('compassBtn');
+      if(this._followHeading){
+        btn.style.background='rgba(0,122,255,0.12)';btn.style.borderColor='rgba(0,122,255,0.3)';
+        this.toast('🧭 מפה מסתובבת לפי כיוון המכשיר');
+      }else{
+        btn.style.background='';btn.style.borderColor='';
+        this.map.easeTo({bearing:0,pitch:0,duration:500});
+        this.toast('🧭 מפה נעולה — צפון למעלה');
+      }
+    };
     document.getElementById('recenterBtn').onclick=()=>this.recenter();
     document.getElementById('trafficBtn').onclick=()=>this.toggleTraffic();
     document.getElementById('navDismiss').onclick=()=>this.clearNav();
