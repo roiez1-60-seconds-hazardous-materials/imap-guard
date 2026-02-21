@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f2f2f7">
+<title>iMap Guard - אודות ותנאי שימוש</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f2f2f7;--card:#ffffff;--text:#1c1c1e;--text2:#3a3a3c;--text3:#8e8e93;--text4:#aeaeb2;
+  --sep:rgba(60,60,67,0.08);--blue:#007aff;--green:#34c759;--orange:#ff9500;--red:#ff3b30;--purple:#af52de;
+  --radius:16px;--radius-sm:12px;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Heebo',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom,20px);
+}
+
+/* ═══ Header ═══ */
+.header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(242,242,247,0.8);
+  backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:0.5px solid var(--sep);
+  padding:14px 20px;
+  display:flex;align-items:center;gap:14px;
+}
+.back-btn{
+  width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.04);
+  border:none;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;text-decoration:none;color:var(--blue);font-size:20px;
+  transition:all .15s;flex-shrink:0;
+}
+.back-btn:active{background:rgba(0,0,0,0.08);transform:scale(.92)}
+.header-title{font-size:17px;font-weight:700;color:var(--text)}
+
+/* ═══ Hero ═══ */
+.hero{
+  text-align:center;padding:40px 24px 32px;
+}
+.hero-logo{
+  width:68px;height:68px;border-radius:16px;
+  background:linear-gradient(145deg,#007aff,#0055d4);
+  display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 24px rgba(0,122,255,0.2);margin-bottom:16px;
+}
+.hero-logo svg{width:32px;height:32px;color:white}
+.hero h1{font-family:'Secular One',sans-serif;font-size:28px;color:var(--text);margin-bottom:6px}
+.hero-version{font-size:13px;color:var(--text3);font-weight:500;margin-bottom:4px}
+.hero-credit{font-size:14px;color:var(--text2);font-weight:600}
+
+/* ═══ Content ═══ */
+.content{max-width:640px;margin:0 auto;padding:0 16px}
+
+/* Section */
+.section{margin-bottom:24px}
+.section-title{
+  font-size:13px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.5px;
+  padding:0 4px 8px;
+}
+
+/* Card */
+.card{
+  background:var(--card);border-radius:var(--radius);
+  overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.02);
+}
+
+/* Info Row */
+.info-row{
+  padding:14px 18px;border-bottom:0.5px solid var(--sep);
+  display:flex;align-items:flex-start;gap:14px;
+}
+.info-row:last-child{border:none}
+
+.info-icon{
+  width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-size:17px;
+}
+.info-icon.blue{background:rgba(0,122,255,0.1)}
+.info-icon.green{background:rgba(52,199,89,0.1)}
+.info-icon.orange{background:rgba(255,149,0,0.1)}
+.info-icon.red{background:rgba(255,59,48,0.1)}
+.info-icon.purple{background:rgba(175,82,222,0.1)}
+.info-icon.gray{background:rgba(142,142,147,0.1)}
+
+.info-content{flex:1;min-width:0}
+.info-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px}
+.info-desc{font-size:13px;color:var(--text3);line-height:1.55}
+
+/* Source Table */
+.source-table{width:100%;border-collapse:collapse}
+.source-table th{
+  font-size:11px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.3px;
+  padding:10px 14px;text-align:right;
+  border-bottom:0.5px solid var(--sep);
+  background:rgba(0,0,0,0.015);
+}
+.source-table td{
+  padding:12px 14px;border-bottom:0.5px solid var(--sep);
+  font-size:13px;color:var(--text2);
+}
+.source-table tr:last-child td{border:none}
+.source-badge{
+  display:inline-block;padding:2px 8px;border-radius:6px;
+  font-size:11px;font-weight:700;
+}
+.source-badge.gps{background:rgba(52,199,89,0.12);color:var(--green)}
+.source-badge.wifi{background:rgba(255,149,0,0.12);color:var(--orange)}
+.source-badge.cell{background:rgba(255,149,0,0.12);color:var(--orange)}
+.source-badge.dr{background:rgba(175,82,222,0.12);color:var(--purple)}
+
+/* Diagram */
+.flow-diagram{padding:18px;display:flex;flex-direction:column;gap:0;align-items:center}
+.flow-step{
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:12px 16px;background:rgba(0,0,0,0.02);border-radius:var(--radius-sm);
+}
+.flow-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--blue);color:white;font-size:13px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.flow-text{font-size:13px;color:var(--text2);font-weight:500}
+.flow-arrow{
+  width:2px;height:16px;background:rgba(0,122,255,0.2);margin-right:34px;
+}
+
+/* Legal text */
+.legal-text{
+  padding:18px;font-size:13px;color:var(--text2);line-height:1.7;
+}
+.legal-text h3{font-size:14px;font-weight:700;color:var(--text);margin:16px 0 6px}
+.legal-text h3:first-child{margin-top:0}
+.legal-text p{margin-bottom:10px}
+.legal-text ul{padding-right:20px;margin-bottom:10px}
+.legal-text li{margin-bottom:4px}
+.legal-text .highlight{
+  background:rgba(255,59,48,0.06);border-right:3px solid var(--red);
+  padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;
+  font-weight:500;
+}
+.legal-text .clause-num{font-weight:800;color:var(--blue)}
+
+/* Limitation cards */
+.limit-card{
+  padding:14px 18px;border-bottom:0.5px solid var(--sep);
+}
+.limit-card:last-child{border:none}
+.limit-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.limit-emoji{font-size:18px}
+.limit-title{font-size:14px;font-weight:700;color:var(--text)}
+.limit-desc{font-size:13px;color:var(--text3);line-height:1.55;padding-right:26px}
+
+/* Footer */
+.footer{
+  text-align:center;padding:32px 20px 24px;
+}
+.footer-text{font-size:12px;color:var(--text4);line-height:1.6}
+.footer-date{font-size:11px;color:var(--text4);margin-top:8px}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <a href="index.html" class="back-btn">→</a>
+  <div class="header-title">אודות ותנאי שימוש</div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3,11 22,2 13,21 11,13"/></svg>
+  </div>
+  <h1>iMap Guard</h1>
+  <div class="hero-version">גרסה 5.0 · Dead Reckoning Edition</div>
+  <div class="hero-credit">פותח ע״י רועי צוקרמן</div>
+</div>
+
+<div class="content">
+
+  <!-- ═══════════════════════════════════════
+       SECTION: What is iMap Guard
+       ═══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">מה זה iMap Guard?</div>
+    <div class="card">
+      <div class="info-row">
+        <div class="info-icon blue">🧭</div>
+        <div class="info-content">
+          <div class="info-title">כלי ניווט ניסיוני לתנאי שיבוש GPS</div>
+          <div class="info-desc">iMap Guard הוא כלי ניסיוני שנועד לסייע בניווט בסיסי כאשר אותות ה-GPS מופרעים או משובשים, כפי שקורה באזורים שונים בישראל עקב שיבושים חיצוניים. הכלי אינו מחליף אפליקציות ניווט מקצועיות.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION: How it works
+       ═══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">כיצד הכלי עובד?</div>
+    <div class="card">
+      <div class="info-row">
+        <div class="info-icon green">📡</div>
+        <div class="info-content">
+          <div class="info-title">שלב 1 — מיקום רגיל (GPS)</div>
+          <div class="info-desc">כשה-GPS תקין, הכלי משתמש בלוויינים לקביעת מיקום מדויק (5-20 מטר). זה אותו מיקום שכל אפליקציה אחרת מקבלת.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon orange">📶</div>
+        <div class="info-content">
+          <div class="info-title">שלב 2 — Fallback סלולרי/WiFi</div>
+          <div class="info-desc">כשה-GPS מופרע, מערכת ההפעלה של הטלפון (אנדרואיד/iOS) עוברת אוטומטית למיקום לפי אנטנות סלולריות ורשתות WiFi. <strong>חשוב להבין:</strong> זה לא משהו ש-iMap Guard עושה בעצמו — מערכת ההפעלה שולחת את נתוני האנטנות לשרתי Google/Apple ומקבלת מיקום משוער. iMap Guard פשוט מבקש מיקום מהדפדפן, וזה מה שהוא מקבל.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon purple">🦶</div>
+        <div class="info-content">
+          <div class="info-title">שלב 3 — Dead Reckoning (חיישנים)</div>
+          <div class="info-desc">כשגם ה-GPS וגם המיקום הסלולרי לא זמינים, הכלי עובר למצב Dead Reckoning — שימוש באקסלרומטר לזיהוי צעדים ובמצפן הדיגיטלי לכיוון. הכלי "סופר" את הצעדים ומעריך לאן התקדמת. <strong>דיוק זה מתדרדר עם הזמן</strong> — אחרי דקה-שתיים הסטייה יכולה להגיע לעשרות מטרים.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon red">⚠️</div>
+        <div class="info-content">
+          <div class="info-title">שלב 4 — זיהוי שיבוש (Spoofing Detection)</div>
+          <div class="info-desc">הכלי מנתח את נתוני ה-GPS ומחפש חריגות: קפיצות מיקום בלתי אפשריות (למשל ירדן תוך שנייה), סתירות עם חיישני התנועה, ומיקום מחוץ לגבולות ישראל. כשמזוהה שיבוש — הכלי מתעלם מה-GPS השגוי ועובר ל-Dead Reckoning.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION: Sources Table
+       ═══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">מקורות מיקום ודיוק</div>
+    <div class="card">
+      <table class="source-table">
+        <thead>
+          <tr>
+            <th>מקור</th>
+            <th>דיוק</th>
+            <th>תנאי</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="source-badge gps">GPS</span></td>
+            <td>5–20 מטר</td>
+            <td>GPS תקין, שמיים פתוחים</td>
+          </tr>
+          <tr>
+            <td><span class="source-badge wifi">WiFi</span></td>
+            <td>20–80 מטר</td>
+            <td>רשתות WiFi בסביבה</td>
+          </tr>
+          <tr>
+            <td><span class="source-badge cell">סלולרי</span></td>
+            <td>100–500 מטר</td>
+            <td>קליטה סלולרית, חיבור אינטרנט</td>
+          </tr>
+          <tr>
+            <td><span class="source-badge dr">Dead Reckoning</span></td>
+            <td>10–200+ מטר</td>
+            <td>חיישני טלפון פעילים, מתדרדר עם הזמן</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION: What iMap Guard DOESN'T do
+       ═══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">מה הכלי לא עושה — שקיפות מלאה</div>
+    <div class="card">
+      <div class="limit-card">
+        <div class="limit-header">
+          <span class="limit-emoji">🚫</span>
+          <span class="limit-title">לא ממציא GPS</span>
+        </div>
+        <div class="limit-desc">הכלי לא יכול ליצור אות GPS שלא קיים. כשה-GPS משובש, הדיוק יורד משמעותית — מ-10 מטר למאות מטרים. אין דרך לעקוף את זה בתוכנה.</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-header">
+          <span class="limit-emoji">🔄</span>
+          <span class="limit-title">Fallback סלולרי — לא קסם</span>
+        </div>
+        <div class="limit-desc">מיקום לפי אנטנות סלולריות ו-WiFi הוא יכולת מובנית של מערכת ההפעלה (אנדרואיד/iOS). גם Waze וגוגל מפות מקבלים את אותו fallback. iMap Guard לא עושה משהו שונה ברמת המיקום הגולמי — ההבדל הוא בשקיפות, בזיהוי שיבושים, וב-Dead Reckoning.</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-header">
+          <span class="limit-emoji">📉</span>
+          <span class="limit-title">Dead Reckoning מתדרדר</span>
+        </div>
+        <div class="limit-desc">מיקום לפי חיישנים (צעדים + מצפן) צובר שגיאה עם הזמן. אחרי 30 שניות — סטייה של 10-30 מטר. אחרי 2 דקות — 50-200 מטר. אחרי 5 דקות — כמעט חסר שימוש. מד הביטחון באפליקציה מראה את הירידה בזמן אמת.</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-header">
+          <span class="limit-emoji">🌐</span>
+          <span class="limit-title">דורש אינטרנט</span>
+        </div>
+        <div class="limit-desc">המפה, חיפוש היעדים, והמיקום הסלולרי דורשים חיבור אינטרנט פעיל. ללא אינטרנט — רק Dead Reckoning זמין (ללא מפה).</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-header">
+          <span class="limit-emoji">📱</span>
+          <span class="limit-title">מגבלות דפדפן</span>
+        </div>
+        <div class="limit-desc">כאפליקציית ווב, הכלי מוגבל ביכולות הגישה לחומרה. אפליקציה נייטיבית (שדורשת פיתוח נפרד לאנדרואיד/iOS) יכולה לגשת ישירות לנתוני Cell Tower IDs, לבצע triangulation עצמאי, ולעבוד אופליין.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION: Flow Diagram
+       ═══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">תרשים פעולה — מה קורה כשה-GPS נופל</div>
+    <div class="card">
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-text">GPS פעיל ותקין → מיקום מדויק (5-20 מ׳)</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:var(--orange)">2</div>
+          <div class="flow-text">GPS מופרע → מערכת ההפעלה עוברת לסלולר/WiFi (100-500 מ׳)</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:var(--red)">3</div>
+          <div class="flow-text">GPS מדווח מיקום שגוי (ירדן/סוריה) → iMap Guard מזהה שיבוש</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:var(--purple)">4</div>
+          <div class="flow-text">מתעלם מ-GPS → עובר ל-Dead Reckoning מהמיקום האחרון האמין</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:var(--green)">5</div>
+          <div class="flow-text">GPS חוזר לתקין → חוזר אוטומטית למיקום מדויק ✅</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION: Legal Disclaimer
+       ═══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">תנאי שימוש והסרת אחריות</div>
+    <div class="card">
+      <div class="legal-text">
+
+        <h3><span class="clause-num">1.</span> כללי</h3>
+        <p>iMap Guard (להלן: "הכלי") הינו כלי תוכנה ניסיוני לסיוע בניווט בסיסי בתנאי שיבוש GPS, אשר פותח על ידי רועי צוקרמן (להלן: "המפתח"). השימוש בכלי מהווה הסכמה לתנאי שימוש אלה במלואם.</p>
+
+        <h3><span class="clause-num">2.</span> מהות הכלי ומגבלותיו</h3>
+        <p>הכלי מסופק "כמות שהוא" (AS IS) ו"ככל שזמין" (AS AVAILABLE), ללא מצג או התחייבות מכל סוג שהוא, מפורשת או משתמעת, לרבות אך לא רק, התחייבויות בדבר התאמה למטרה מסוימת, דיוק, אמינות, או זמינות.</p>
+        <p>המשתמש מצהיר כי הוא מבין ומסכים כי:</p>
+        <ul>
+          <li>הכלי הינו <strong>ניסיוני</strong> ואינו מהווה תחליף למערכות ניווט מקצועיות, מוסמכות או מאושרות.</li>
+          <li>נתוני המיקום המוצגים עשויים להיות <strong>לא מדויקים</strong>, ובמצבי שיבוש GPS עשויים לסטות במאות מטרים מהמיקום בפועל.</li>
+          <li>מנגנון ה-Dead Reckoning מבוסס על הערכות מחיישני הטלפון וצובר שגיאה מצטברת עם הזמן.</li>
+          <li>זיהוי שיבושי GPS אינו מושלם ועלול לייצר התראות שווא (false positives) או לא לזהות שיבוש (false negatives).</li>
+        </ul>
+
+        <h3><span class="clause-num">3.</span> הסרת אחריות</h3>
+        <div class="highlight">
+          המפתח לא יהיה אחראי בשום מקרה ובשום נסיבות לכל נזק ישיר, עקיף, מקרי, תוצאתי, מיוחד, עונשי או כל נזק אחר, לרבות אך לא רק נזקי גוף, נזקי רכוש, הפסד כספי, אובדן מידע, או כל נזק אחר הנובע או הקשור לשימוש בכלי או לחוסר יכולת לעשות בו שימוש.
+        </div>
+        <p>מבלי לגרוע מכלליות האמור לעיל, המפתח אינו אחראי לכל נזק הנובע מ:</p>
+        <ul>
+          <li>הסתמכות על נתוני מיקום שגויים, לא מדויקים, או לא עדכניים.</li>
+          <li>כשל בזיהוי שיבוש GPS או זיהוי שגוי של שיבוש.</li>
+          <li>אי-זמינות השירות, תקלות טכניות, או הפסקות פעולה.</li>
+          <li>החלטות ניווט שנתקבלו על בסיס המידע המוצג בכלי.</li>
+          <li>שימוש בכלי במהלך נהיגה או בתנאים המסכנים את המשתמש או אחרים.</li>
+        </ul>
+
+        <h3><span class="clause-num">4.</span> שימוש אחראי</h3>
+        <p>המשתמש מתחייב כי:</p>
+        <ul>
+          <li>לא יסתמך על הכלי כמקור מידע יחיד לצורכי ניווט, ובפרט לא במצבי חירום.</li>
+          <li>ישתמש בכלי כאמצעי משלים בלבד לכלי ניווט מקצועיים ומאושרים.</li>
+          <li>לא ישתמש בכלי באופן שעלול לסכן את עצמו או אחרים, לרבות שימוש תוך כדי נהיגה.</li>
+          <li>יפעיל שיקול דעת עצמאי ולא יסתמך באופן בלעדי על המידע המוצג.</li>
+        </ul>
+
+        <h3><span class="clause-num">5.</span> פרטיות ונתונים</h3>
+        <p>הכלי פועל באופן מקומי בדפדפן המשתמש. נתוני המיקום אינם נשמרים, אינם נשלחים לשרתי המפתח, ואינם משותפים עם צדדים שלישיים. בקשות חיפוש כתובת נשלחות לשירות Nominatim של OpenStreetMap (או Mapbox, במידה ומופעל). נתוני מפה נטענים מספקי מפות חיצוניים (CartoDB/Mapbox).</p>
+
+        <h3><span class="clause-num">6.</span> קניין רוחני</h3>
+        <p>כל הזכויות בכלי, לרבות קוד המקור, העיצוב, והמנגנונים הייחודיים (זיהוי שיבוש, Dead Reckoning), שמורות למפתח. השימוש בכלי אינו מקנה למשתמש זכויות קניין רוחני כלשהן.</p>
+
+        <h3><span class="clause-num">7.</span> שינויים בתנאים</h3>
+        <p>המפתח שומר לעצמו את הזכות לעדכן תנאים אלה בכל עת וללא הודעה מוקדמת. המשך השימוש בכלי לאחר עדכון התנאים מהווה הסכמה לתנאים המעודכנים.</p>
+
+        <h3><span class="clause-num">8.</span> דין וסמכות שיפוט</h3>
+        <p>תנאי שימוש אלה כפופים לדיני מדינת ישראל. סמכות השיפוט הבלעדית בכל עניין הנוגע לתנאים אלה או לשימוש בכלי תהיה נתונה לבתי המשפט המוסמכים בישראל בלבד.</p>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION: Technical Info
+       ═══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">מידע טכני</div>
+    <div class="card">
+      <div class="info-row">
+        <div class="info-icon gray">⚙️</div>
+        <div class="info-content">
+          <div class="info-title">טכנולוגיות</div>
+          <div class="info-desc">HTML5, CSS3, JavaScript · Leaflet.js / Mapbox GL · Geolocation API · DeviceOrientation API · DeviceMotion API · OpenStreetMap / Mapbox Tiles</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon gray">📋</div>
+        <div class="info-content">
+          <div class="info-title">דרישות מערכת</div>
+          <div class="info-desc">דפדפן מודרני (Chrome, Safari, Firefox) · הרשאות מיקום · חיבור אינטרנט · חיישני תנועה (לצורך Dead Reckoning)</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon gray">📦</div>
+        <div class="info-content">
+          <div class="info-title">גרסה</div>
+          <div class="info-desc">iMap Guard v5.0 — Dead Reckoning + Spoofing Detection</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-text">
+    כלי ניסיוני · פותח ע״י רועי צוקרמן<br>
+    כל הזכויות שמורות ©
+  </div>
+  <div class="footer-date">עודכן לאחרונה: פברואר 2025</div>
+</div>
+
+</body>
+</html>
