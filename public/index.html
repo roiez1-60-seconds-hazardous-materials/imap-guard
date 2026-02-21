@@ -581,6 +581,7 @@ const App={
   events(){
     document.getElementById('btnLocate').onclick=()=>this.locate();
     document.getElementById('btnTrack').onclick=()=>this.startTrack();
+    document.getElementById('compassBtn').onclick=()=>this.map.easeTo({bearing:0,pitch:0,duration:500});
     document.getElementById('recenterBtn').onclick=()=>this.recenter();
     document.getElementById('trafficBtn').onclick=()=>this.toggleTraffic();
     document.getElementById('navDismiss').onclick=()=>this.clearNav();
