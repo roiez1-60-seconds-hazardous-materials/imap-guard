@@ -212,6 +212,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 <div class="side-controls" id="sideControls">
   <div class="ctrl-btn" id="compassBtn"><svg class="compass-svg" id="compassSvg" width="22" height="22" viewBox="0 0 40 40"><polygon points="20,4 24.5,20 20,17 15.5,20" fill="#ff3b30"/><polygon points="20,36 15.5,20 20,23 24.5,20" fill="#c7c7cc"/></svg></div>
   <div class="ctrl-btn" id="recenterBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg></div>
+  <div class="ctrl-btn" id="trafficBtn" title="תנועה חיה" style="position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2.2"><circle cx="12" cy="5" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="19" r="2.5"/><rect x="8" y="1" width="8" height="22" rx="2" stroke="#34c759" fill="none"/></svg></div>
 </div>
 
 <div id="map"></div>
@@ -220,7 +221,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
   <div class="sheet-grip"></div>
   <div class="nav-panel" id="navPanel">
     <div class="route-modes">
-      <button class="route-mode active" id="modeDrive" data-mode="driving">🚗 נסיעה</button>
+      <button class="route-mode active" id="modeDrive" data-mode="driving-traffic">🚗 נסיעה</button>
       <button class="route-mode" id="modeWalk" data-mode="walking">🚶 הליכה</button>
     </div>
     <div class="nav-card-bg">
@@ -290,7 +291,7 @@ const Spoof={
 
 /* ═══ App ═══ */
 const App={
-  map:null,marker:null,accCircle:null,routeMode:'driving',
+  map:null,marker:null,accCircle:null,routeMode:'driving-traffic',
   wId:null,fbW:null,tracking:false,pos:null,heading:null,
   dest:null,hist:[],sTmr:null,ready:false,firstFix:false,
   lastGPSTime:0,drMode:false,_drWatchdog:null,
@@ -320,6 +321,26 @@ const App={
       let labelLayerId;
       for(const l of layers){if(l.type==='symbol'&&l.layout['text-field']){labelLayerId=l.id;break}}
       this.map.addLayer({id:'3d-buildings',source:'composite','source-layer':'building',filter:['==','extrude','true'],type:'fill-extrusion',minzoom:14,paint:{'fill-extrusion-color':'#ddd','fill-extrusion-height':['get','height'],'fill-extrusion-base':['get','min_height'],'fill-extrusion-opacity':.5}},labelLayerId);
+
+      // ═══ Live Traffic Layer ═══
+      this.map.addSource('mapbox-traffic',{type:'vector',url:'mapbox://mapbox.mapbox-traffic-v1'});
+      this.map.addLayer({
+        id:'traffic-line',type:'line',source:'mapbox-traffic','source-layer':'traffic',
+        minzoom:6,
+        layout:{'line-join':'round','line-cap':'round'},
+        paint:{
+          'line-width':['interpolate',['linear'],['zoom'],6,0.5,9,1.5,14,3,18,6],
+          'line-color':['match',['get','congestion'],
+            'low','#34c759',
+            'moderate','#ff9500',
+            'heavy','#ff3b30',
+            'severe','#af0000',
+            'rgba(0,0,0,0)'],
+          'line-opacity':0.7,
+          'line-offset':['interpolate',['linear'],['zoom'],6,0,9,0.5,14,2,18,4]
+        }
+      },labelLayerId);
+      this._trafficVisible=true;
 
       // Route source
       this.map.addSource('route',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[]}}});
@@ -549,10 +570,19 @@ const App={
   hideSplash(){document.getElementById('splash').classList.add('hidden')},
   recenter(){if(this.pos&&this.ready)this.map.flyTo({center:[this.pos.lng,this.pos.lat],zoom:16,pitch:45,duration:800})},
 
+  toggleTraffic(){
+    this._trafficVisible=!this._trafficVisible;
+    this.map.setLayoutProperty('traffic-line','visibility',this._trafficVisible?'visible':'none');
+    const btn=document.getElementById('trafficBtn');
+    btn.style.opacity=this._trafficVisible?'1':'0.4';
+    this.toast(this._trafficVisible?'🚦 תנועה חיה — פעיל':'🚦 תנועה חיה — כבוי');
+  },
+
   events(){
     document.getElementById('btnLocate').onclick=()=>this.locate();
     document.getElementById('btnTrack').onclick=()=>this.startTrack();
     document.getElementById('recenterBtn').onclick=()=>this.recenter();
+    document.getElementById('trafficBtn').onclick=()=>this.toggleTraffic();
     document.getElementById('navDismiss').onclick=()=>this.clearNav();
     // Route mode toggle
     document.querySelectorAll('.route-mode').forEach(btn=>{
