@@ -652,6 +652,21 @@ const App={
     document.getElementById('recenterBtn').onclick=()=>this.recenter();
     document.getElementById('trafficBtn').onclick=()=>this.toggleTraffic();
     document.getElementById('navDismiss').onclick=()=>this.clearNav();
+    // Map long-press / click to set destination
+    this.map.on('click',(e)=>{
+      // Ignore if clicking on controls area
+      if(e.originalEvent.target.closest('.sheet,.topbar,.search-area,.side-controls,.spoof-alert,.dr-banner'))return;
+      const{lng,lat}=e.lngLat;
+      // Reverse geocode to get address
+      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=he&limit=1`)
+        .then(r=>r.json()).then(data=>{
+          const name=data.features&&data.features.length>0?data.features[0].text||data.features[0].place_name.split(',')[0]:`${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          this.setDest(lat,lng,name);
+          document.getElementById('searchInput').value=name;
+        }).catch(()=>{
+          this.setDest(lat,lng,`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+        });
+    });
     // Route mode toggle
     document.querySelectorAll('.route-mode').forEach(btn=>{
       btn.onclick=()=>{
