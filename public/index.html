@@ -1328,8 +1328,9 @@ const App={
     document.addEventListener('click',e=>{if(!e.target.closest('.search-area')){sa.classList.remove('focus');document.body.classList.remove('searching')}});
     const tn=document.getElementById('turn');if(window.ResizeObserver)new ResizeObserver(()=>requestAnimationFrame(()=>document.documentElement.style.setProperty('--turn-h',Math.round(tn.getBoundingClientRect().height)+'px'))).observe(tn);
     // גובה ההתראות דוחף את החיפוש והכפתורים
-    const bn=document.getElementById('banners');const setBH=()=>requestAnimationFrame(()=>{const h=bn.getBoundingClientRect().height;document.documentElement.style.setProperty('--banners-h',(h>4?h+8:0)+'px')});
-    if(window.ResizeObserver)new ResizeObserver(setBH).observe(bn);setBH();
+    const bn=document.getElementById('banners');const setBH=()=>{const h=bn.getBoundingClientRect().height;document.documentElement.style.setProperty('--banners-h',(h>4?h+8:0)+'px')};this._setBH=setBH;
+    if(window.ResizeObserver)new ResizeObserver(()=>requestAnimationFrame(setBH)).observe(bn);setBH();
+    if(window.MutationObserver)new MutationObserver(setBH).observe(bn,{attributes:true,subtree:true,attributeFilter:['class']});
     // חיבור
     const onl=()=>{if(!navigator.onLine){this.setSource('אין חיבור · מידע אחרון','none');this.toast('אין חיבור — המפה שנשמרה והמיקום האחרון עדיין זמינים')}};
     window.addEventListener('online',()=>{this.toast('החיבור חזר');if(this.pos)this.render()});window.addEventListener('offline',onl);if(!navigator.onLine)onl();
