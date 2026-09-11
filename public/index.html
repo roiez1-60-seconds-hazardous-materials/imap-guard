@@ -387,7 +387,8 @@ const App={
       this.ready=true;
       const mb=(GL===window.mapboxgl&&USE_MAPBOX);
       /* תוויות בעברית בלבד (במקום לטינית + עברית) — רק במפה החינמית */
-      if(!mb)try{for(const l of this.map.getStyle().layers){if(l.type!=='symbol'||!l.layout||!l.layout['text-field'])continue;if(/shield|ref/.test(l.id)||JSON.stringify(l.layout['text-field']).includes('"ref"'))continue;this.map.setLayoutProperty(l.id,'text-field',['coalesce',['get','name:he'],['get','name'],['get','name:latin']]);}}catch(e){console.warn('labels',e)}
+      /* תוויות בעברית בלבד — בשני המנועים (במפבוקס ברירת המחדל היא אנגלית) */
+      try{for(const l of this.map.getStyle().layers){if(l.type!=='symbol'||!l.layout||!l.layout['text-field'])continue;if(/shield|ref/.test(l.id)||JSON.stringify(l.layout['text-field']).includes('"ref"'))continue;this.map.setLayoutProperty(l.id,'text-field',['coalesce',['get','name_he'],['get','name:he'],['get','name'],['get','name:latin'],['get','name_en']]);}}catch(e){console.warn('labels',e)}
       /* ליטוש המראה של המפה החינמית: רקע חם, מים בהירים, ירוק רך — קרוב יותר למפות של אפל */
       if(!mb)try{const P=(id,k,v)=>{if(this.map.getLayer(id))this.map.setPaintProperty(id,k,v)};P('background','background-color','#f5f4f0');P('water','fill-color','#b7d7f2');P('park','fill-color','#cfe6c4');P('landcover_grass','fill-color','#dbebcf');P('landcover_wood','fill-color','#c9dfbd');P('landuse_residential','fill-color','#efeee9');}catch(e){}
       if(mb){
