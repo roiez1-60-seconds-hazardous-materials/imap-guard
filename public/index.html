@@ -242,7 +242,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .search-field:focus-within svg{color:var(--blue)}
 .search-field input{flex:1;border:none;background:none;font-family:inherit;font-size:16px;padding:15px 0;outline:none;color:var(--text);direction:rtl;font-weight:500}
 .search-field input::placeholder{color:var(--text4);font-weight:400}
-.results-list{margin-top:8px;background:var(--card);backdrop-filter:var(--blur-heavy);-webkit-backdrop-filter:var(--blur-heavy);border-radius:var(--radius);border:0.5px solid var(--sep);box-shadow:var(--shadow-lg);max-height:240px;overflow-y:auto;display:none}
+.results-list{margin-top:8px;background:var(--card);backdrop-filter:var(--blur-heavy);-webkit-backdrop-filter:var(--blur-heavy);border-radius:var(--radius);border:0.5px solid var(--sep);box-shadow:var(--shadow-lg);max-height:min(40vh,320px);overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;display:none}
 .results-list.open{display:block}
 .result-row{padding:13px 18px;cursor:pointer;border-bottom:0.5px solid var(--sep);display:flex;align-items:center;gap:12px;transition:background .12s}
 .result-row:active{background:rgba(0,122,255,0.05)}
@@ -498,6 +498,20 @@ const THEME_KEY='ig-theme';
 function wantDark(){const s=localStorage.getItem(THEME_KEY);return s?s==='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
 function applyTheme(dark){document.documentElement.dataset.theme=dark?'dark':'light';const m=document.querySelector('meta[name=theme-color]');if(m)m.content=dark?'#000000':'#f2f2f7';const b=document.getElementById('nightBtn');if(b)b.classList.toggle('on',dark)}
 applyTheme(wantDark());
+/* שמות יישובים בני שתי מילים — כדי ש«נסציונה» ו«פתחתקוה» ייפתרו */
+const CITIES=['נס ציונה','פתח תקווה','פתח תקוה','ראשון לציון','תל אביב','באר שבע','רמת גן','כפר סבא','בית שמש','רמת השרון','הוד השרון','קרית גת','קרית אתא','קרית ים','קרית מוצקין','קרית ביאליק','קרית אונו','קרית מלאכי','קרית שמונה','קרית טבעון','גבעת שמואל','מודיעין עילית','מודיעין מכבים רעות','בני ברק','בת ים','אור יהודה','אור עקיבא','גני תקווה','מעלה אדומים','זכרון יעקב','פרדס חנה','ראש העין','גן יבנה','באר יעקב','מגדל העמק','נוף הגליל','כפר יונה','תל מונד','אבן יהודה','כוכב יאיר','שוהם','יהוד מונוסון','קדימה צורן','מזכרת בתיה','כפר קאסם','אום אל פחם','נצרת עילית','ביתר עילית','בית שאן','מעלות תרשיחא','כפר ורדים','גבעת עדה','בית דגן','גבעת זאב','ראש פינה','קרית ארבע','מעלה אפרים','אלפי מנשה','באקה אל גרביה','ג׳לג׳וליה','אבו גוש','נווה מונוסון'];
+const CITY_NOSPACE=new Map(CITIES.map(c=>[c.replace(/\s+/g,''),c]));
+function normCity(s){s=(s||'').trim().replace(/\s+/g,' ');const k=s.replace(/\s+/g,'');return CITY_NOSPACE.get(k)||s}
+function parseAddress(q){
+  q=q.trim().replace(/\s+/g,' ');
+  let street=q,city='';
+  const parts=q.split(/[,،]/).map(s=>s.trim()).filter(Boolean);
+  if(parts.length>=2){street=parts[0];city=parts.slice(1).join(' ')}
+  else{const m=q.match(/^(.+?\s\d+[א-ת]?)\s+(.+)$/);if(m){street=m[1];city=m[2]}}
+  city=normCity(city);
+  // גם בתוך שם הרחוב עלול להיות יישוב דבוק («רוטשילד 25 נסציונה»)
+  return{street,city,hasNum:/\d/.test(street)};
+}
 /* הנחיות פנייה בעברית מתוך תיאור המניפולציה של שרת הניווט */
 const DIR_HE={'uturn':'פנה פרסה','sharp right':'פנה חד ימינה','right':'פנה ימינה','slight right':'היצמד ימינה','straight':'המשך ישר','slight left':'היצמד שמאלה','left':'פנה שמאלה','sharp left':'פנה חד שמאלה'};
 const ARROW={'uturn':'↩','sharp right':'↘','right':'→','slight right':'↗','straight':'↑','slight left':'↖','left':'←','sharp left':'↙','roundabout':'⟳','arrive':'🏁','depart':'▶'};
@@ -845,11 +859,21 @@ const App={
       const nomi=async(params)=>{const res=await timedFetch(`${NOMINATIM}/search?${params}&countrycodes=il&accept-language=he&format=jsonv2&addressdetails=1&limit=5`,8000,ac);if(res.status===429||res.status>=500)return[];const r=await res.json();return(Array.isArray(r)?r:[]).map(f=>{const a=f.address||{};const city=a.city||a.town||a.village||a.municipality||'';const road=a.road||a.pedestrian||'';const parts=(f.display_name||'').split(',').map(s=>s.trim()).filter(s=>s&&s!=='ישראל');let nm,ad;if(a.house_number&&road){nm=road+' '+a.house_number;ad=city}else if(f.name&&city&&f.name!==city){nm=f.name;ad=(road?road+', ':'')+city}else{nm=f.name||parts[0];ad=parts.slice(1,4).join(', ')}return{nm,ad,full:ad?nm+', '+ad:nm,lat:+f.lat,lng:+f.lon,exact:!!a.house_number}})};
       /* כתובת עם מספר בית: OpenStreetMap (Nominatim) פותר כתובות בישראל נכון — «רוטשילד 25, נס ציונה» — ומפבוקס מתבלבל.
          לכן עם מספר: קודם Nominatim (מובנה כשיש פסיק: רחוב, עיר), ואז מפבוקס כהשלמה. */
+      const pa=parseAddress(q);
       if(hasNum){
-        const parts=q.split(/[,،]/).map(s=>s.trim()).filter(Boolean);
-        if(parts.length>=2){try{items=await nomi(`street=${encodeURIComponent(parts[0])}&city=${encodeURIComponent(parts.slice(1).join(' '))}`)}catch(e){}}
-        if(!items.length){try{items=await nomi(`q=${encodeURIComponent(q)}`)}catch(e){}}
+        let city=pa.city;
+        if(city){try{items=await nomi(`street=${encodeURIComponent(pa.street)}&city=${encodeURIComponent(city)}`)}catch(e){}}
+        // היישוב לא זוהה (שגיאת כתיב)? מפבוקס מזהה יישובים גם בכתיב משובש — לוקחים את השם התקני ומנסים שוב
+        if(!items.length&&city&&USE_MAPBOX){
+          try{const cr=await(await timedFetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(city)}.json?access_token=${MAPBOX_TOKEN}&country=il&language=he&types=place,locality&limit=1`,6000,ac)).json();
+            const f=cr.features&&cr.features[0];if(f&&f.text&&f.text!==city){city=f.text;items=await nomi(`street=${encodeURIComponent(pa.street)}&city=${encodeURIComponent(city)}`)}
+            if(!items.length&&f&&f.center){const [lx,ly]=f.center;items=await nomi(`q=${encodeURIComponent(pa.street)}&viewbox=${lx-0.08},${ly+0.08},${lx+0.08},${ly-0.08}&bounded=1`)}
+          }catch(e){}
+        }
+        if(!items.length){try{items=await nomi(`q=${encodeURIComponent(pa.city?pa.street+', '+pa.city:q)}`)}catch(e){}}
+        if(!items.length&&pa.city){try{items=await nomi(`q=${encodeURIComponent(q)}`)}catch(e){}}
         if(ac!==this._sc)return;
+        pa.cityFinal=city;
       }
       if(USE_MAPBOX){
         const prox=this.pos?`&proximity=${this.pos.lng},${this.pos.lat}`:'';
@@ -861,6 +885,9 @@ const App={
       }else if(items.length<3){
         try{const more=await nomi(`q=${encodeURIComponent(q)}`);for(const m of more){if(!items.some(i=>this.dist(i.lat,i.lng,m.lat,m.lng)<60))items.push(m)}}catch(e){}
       }
+      // תוצאות מאותו יישוב שהמשתמש כתב — קודם
+      if(pa.cityFinal||pa.city){const cc=(pa.cityFinal||pa.city).replace(/\s+/g,'');items.sort((a,b)=>(String(b.ad||'').replace(/\s+/g,'').includes(cc)?1:0)-(String(a.ad||'').replace(/\s+/g,'').includes(cc)?1:0))}
+      {const seen=new Set();items=items.filter(i=>{const k=(i.nm+'|'+i.ad).replace(/\s+/g,'');if(seen.has(k))return false;seen.add(k);return true})}
       items=items.slice(0,6);
       if(ac!==this._sc)return;
       c.innerHTML='';
