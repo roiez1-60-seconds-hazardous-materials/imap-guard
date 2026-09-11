@@ -70,6 +70,24 @@
 .sheet-grip{cursor:pointer;padding:6px 0;margin:-6px auto 8px;width:60px;background:none}
 .sheet-grip::after{content:'';display:block;width:36px;height:5px;border-radius:3px;background:rgba(0,0,0,0.14);margin:0 auto}
 [data-theme=dark] .sheet-grip::after{background:rgba(255,255,255,0.25)}
+/* בזמן ניווט: שורה אחת — נותר · מרחק · הגעה · עצור. הכרטיס המלא מוסתר */
+body.navon .sheet .nav-panel{display:none}
+/* כרטיס יעד מכווץ: שם, מרחק·זמן, התחל — האפשרויות (נסיעה/הליכה, מסלולים) נפתחות בלחיצה */
+.sheet.collapsed .route-modes,.sheet.collapsed #altSeg,.sheet.collapsed .nav-bearing{display:none!important}
+.sheet.collapsed .nav-card-bg{padding:10px 14px}
+.sheet.collapsed .btn-nav{margin-top:8px;padding:10px}
+.more-link{display:none;font-size:12.5px;color:var(--blue);font-weight:600;cursor:pointer;margin:6px 0 0;text-align:center}
+.sheet.collapsed .more-link{display:block}
+.mic{background:none;border:0;padding:0;cursor:pointer;color:var(--text3);display:flex}
+.mic .ico{width:22px;height:22px}
+.mic.listening{color:var(--red);animation:pulse 1s infinite}
+.navbar{display:none;align-items:center;justify-content:space-between;gap:10px;padding:2px 0 4px}
+body.navon .sheet .navbar{display:flex}
+.navbar .nb{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.navbar b{font-size:26px;font-weight:900;color:var(--green-t);line-height:1}
+.navbar span{font-size:15px;font-weight:600;color:var(--text2)}
+.navbar small{font-size:12px;color:var(--text3);display:block;margin-top:2px}
+.navbar .nb-stop{border:0;background:var(--red-light);color:var(--red);border-radius:12px;padding:10px 16px;font-weight:800;font-family:inherit;font-size:15px;cursor:pointer}
 .sheet.hasdest .metrics,.sheet.hasdest .credit-line,.sheet.hasdest .actions{display:none}
 .nav-tools{display:flex;gap:6px;align-items:center}
 .sheet.hasdest .actions{margin-top:0}
@@ -365,6 +383,7 @@ body.radar-on{--stack-h:46px}
   <div class="search-field">
     <button class="search-go" id="searchGo" aria-label="חפש"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
     <input type="search" id="searchInput" placeholder="חפש יעד — כתובת, עיר, מקום" autocomplete="off" spellcheck="false" enterkeyhint="search">
+    <button class="mic" id="micBtn" aria-label="חיפוש קולי"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button>
   </div>
   <div class="results-list" id="resultsList"></div>
   <div class="help-chips" id="helpChips"><button class="help-chip" data-kind="hospital">בתי חולים</button><button class="help-chip" data-kind="shelter">מקלטים</button><button class="help-chip" data-kind="fire">כיבוי</button><button class="help-chip" data-kind="police">משטרה</button><button class="help-chip" data-kind="mda">מד״א</button></div>
@@ -400,6 +419,7 @@ body.radar-on{--stack-h:46px}
 
 <div class="sheet collapsed" id="sheet">
   <div class="sheet-grip" id="sheetGrip" role="button" aria-label="הרחב או כווץ"></div>
+  <div class="navbar" id="navbar"><div class="nb"><div><b id="nbTime">—</b><small id="nbEta"></small></div><span id="nbDist"></span></div><button class="nb-stop" id="nbStop">עצור</button></div>
   <div class="nav-panel" id="navPanel">
     <div class="route-modes seg">
       <button class="route-mode active" id="modeDrive" data-mode="driving-traffic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13.5 5.6 8.6A2 2 0 0 1 7.5 7.2h9a2 2 0 0 1 1.9 1.4L20 13.5"/><rect x="3" y="13.5" width="18" height="5" rx="1.5"/><circle cx="7.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/><circle cx="16.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/></svg>נסיעה</button>
@@ -417,6 +437,7 @@ body.radar-on{--stack-h:46px}
         <button class="nav-dismiss" id="navDismiss" aria-label="סגור"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       </div>
       <div class="seg" id="altSeg" style="display:none;margin-top:8px;font-size:12.5px"></div>
+      <div class="more-link" id="moreLink">אפשרויות מסלול ▴</div>
       <button class="btn-nav" id="btnNav"><span class="ico" style="display:inline-block;vertical-align:-5px;margin-inline-end:6px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 19.5 21 12 17l-7.5 4z"/></svg></span><span id="btnNavT">התחל ניווט</span></button>
     </div>
   </div>
@@ -785,6 +806,20 @@ const App={
   setSource(txt,cls){document.getElementById('pillLabel').textContent=txt;document.getElementById('sourcePill').className='source-pill '+cls},
   heb(h){const d=['צפון','צפון-מזרח','מזרח','דרום-מזרח','דרום','דרום-מערב','מערב','צפון-מערב'];return d[Math.round(h/45)%8]},
 
+  /* ═══ חיפוש קולי בעברית (זיהוי הדיבור של המכשיר) ═══ */
+  voiceSearch(){
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    const btn=document.getElementById('micBtn');
+    if(!SR){this.toast('זיהוי דיבור לא זמין בדפדפן הזה');return}
+    if(this._rec){try{this._rec.stop()}catch(e){}return}
+    const rec=this._rec=new SR();rec.lang='he-IL';rec.interimResults=false;rec.maxAlternatives=1;
+    btn.classList.add('listening');this.toast('מקשיב… אמור כתובת או מקום');
+    rec.onresult=e=>{const txt=(e.results[0]&&e.results[0][0]&&e.results[0][0].transcript||'').trim();if(txt){document.getElementById('searchInput').value=txt;this.search(txt)}};
+    rec.onerror=e=>{this.toast(e.error==='not-allowed'?'אין הרשאה למיקרופון':'לא הצלחתי לשמוע — נסה שוב')};
+    rec.onend=()=>{btn.classList.remove('listening');this._rec=null};
+    try{rec.start()}catch(e){btn.classList.remove('listening');this._rec=null;this.toast('זיהוי דיבור לא זמין')}
+  },
+
   /* ═══ חיפוש כתובת (Nominatim / OpenStreetMap) ═══ */
   async search(q){
     q=(q||'').trim();
@@ -836,7 +871,7 @@ const App={
     el.append(lab,pin);
     if(this.map)this._destMarker=new GL.Marker({element:el,anchor:'bottom'}).setLngLat([lng,lat]).addTo(this.map);
 
-    document.getElementById('navPanel').classList.add('active');document.querySelector('.sheet').classList.add('hasdest');
+    document.getElementById('navPanel').classList.add('active');document.querySelector('.sheet').classList.add('hasdest');document.querySelector('.sheet').classList.add('collapsed');
     try{document.getElementById('searchInput').blur()}catch(e){}document.getElementById('searchArea').classList.remove('focus');document.body.classList.remove('searching');document.getElementById('resultsList').classList.remove('open');
     document.getElementById('navLabel').textContent='ניווט ל: '+(full&&full!==name?full:name);
     document.getElementById('navDistance').textContent='—';document.getElementById('navTime').textContent='';
@@ -961,7 +996,7 @@ const App={
     document.getElementById('navBearing').textContent='כיוון: '+this.heb(b)+' · '+Math.round(b)+'° · '+ds+' בקו אווירי';
     // זזנו יותר מ־100 מ׳ מנקודת חישוב המסלול — מחשבים מחדש (לא יותר מפעם ב־10 שנ׳)
     if(this._routeFrom&&this.dist(this.pos.lat,this.pos.lng,this._routeFrom.lat,this._routeFrom.lng)>100&&Date.now()-this._routeFrom.t>10000){this._routeFrom.t=Date.now();this.fetchRoute()}
-    if(this._nav){this._updateTurn();this._checkAlerts()}
+    if(this._nav){this._updateTurn();this._checkAlerts();this._updateNavBar()}
   },
 
   /* ═══ ניווט פעיל: כרטיס הפנייה הבאה, מצלמה עוקבת, מסך דולק ═══ */
@@ -972,6 +1007,21 @@ const App={
     let bottom=r?Math.max(0,innerHeight-r.top)+12:280, top=sa&&sa.offsetParent?sa.getBoundingClientRect().bottom+12:120;
     if(top+bottom>innerHeight*0.8)bottom=Math.max(60,innerHeight*0.8-top);
     return{top,bottom,left:40,right:40};
+  },
+  _remaining(){
+    const c=(this._routeGeo||{}).coordinates;if(!c||!this.pos)return null;
+    let best=1e9,me=0;for(let i=0;i<c.length;i++){const d=this.dist(this.pos.lat,this.pos.lng,c[i][1],c[i][0]);if(d<best){best=d;me=i}}
+    let rem=0;for(let i=me;i<c.length-1;i++)rem+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);
+    const rs=(this._routes||[]);const r=rs.find(x=>x.geometry===this._routeGeo)||rs[0];
+    const total=r?r.distance:rem,dur=r?r.duration:0;
+    return{dist:rem,time:total>0?dur*rem/total:0};
+  },
+  _updateNavBar(){
+    const q=this._remaining();if(!q)return;
+    const m=Math.max(1,Math.round(q.time/60));const eta=new Date(Date.now()+q.time*1000);
+    document.getElementById('nbTime').textContent=m<60?m+' דק׳':Math.floor(m/60)+':'+String(m%60).padStart(2,'0')+' שע׳';
+    document.getElementById('nbEta').textContent='הגעה '+eta.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('nbDist').textContent=this._fmtD(q.dist);
   },
   _updateTurn(){
     const st=this._steps||[];if(!this.pos||!st.length){return}
@@ -1016,7 +1066,7 @@ const App={
     try{if(navigator.wakeLock)this._wake=await navigator.wakeLock.request('screen')}catch(e){}
     if(this.ready){const b=this.heading??0;this.map.easeTo({center:[this.pos.lng,this.pos.lat],bearing:b,pitch:55,zoom:16.5,duration:900})}
     if(!this._steps||!this._steps.length)await this.fetchRoute();
-    this._updateTurn();
+    this._updateTurn();this._updateNavBar();
   },
   stopNav(){
     this._nav=false;
@@ -1224,7 +1274,7 @@ const App={
     const sheetEl=document.querySelector('.sheet');const setSH=()=>requestAnimationFrame(()=>{document.documentElement.style.setProperty('--sheet-h',Math.round(innerHeight-sheetEl.getBoundingClientRect().top)+'px');this._placeToast()});
     if(window.ResizeObserver)new ResizeObserver(setSH).observe(sheetEl);setSH();
     document.getElementById('btnNav').onclick=()=>this._nav?this.stopNav():this.startNav();
-    document.getElementById('turnStop').onclick=()=>this.stopNav();
+    document.getElementById('turnStop').onclick=()=>this.stopNav();document.getElementById('nbStop').onclick=()=>this.stopNav();
     // הלוח התחתון: הידית פותחת/סוגרת, וגם החלקה מעלה/מטה עליו
     const sh=document.getElementById('sheet');let sy=null;
     document.getElementById('sheetGrip').onclick=()=>sh.classList.toggle('collapsed');
@@ -1273,6 +1323,8 @@ const App={
     si.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();this.search(si.value)}};
     si.onsearch=()=>this.search(si.value);
     document.getElementById('searchGo').onclick=()=>this.search(si.value);
+    document.getElementById('micBtn').onclick=()=>this.voiceSearch();
+    document.getElementById('moreLink').onclick=()=>document.getElementById('sheet').classList.remove('collapsed');
     document.addEventListener('click',e=>{if(!e.target.closest('.search-area'))document.getElementById('resultsList').classList.remove('open')});
   }
 };
