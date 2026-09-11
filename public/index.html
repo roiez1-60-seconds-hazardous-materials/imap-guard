@@ -415,7 +415,7 @@ const OSRM='https://router.project-osrm.org/route/v1/driving/';
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const OVERPASS='https://overpass-api.de/api/interpreter';
 const STYLE_LIGHT_FREE='https://tiles.openfreemap.org/styles/liberty', STYLE_DARK_FREE='https://tiles.openfreemap.org/styles/dark';
-const STYLE_LIGHT_MB='mapbox://styles/mapbox/streets-v12', STYLE_DARK_MB='mapbox://styles/mapbox/navigation-night-v1';
+const STYLE_LIGHT_MB='mapbox://styles/mapbox/streets-v12', STYLE_DARK_MB='mapbox://styles/mapbox/dark-v11';
 const THEME_KEY='ig-theme';
 function wantDark(){const s=localStorage.getItem(THEME_KEY);return s?s==='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
 function applyTheme(dark){document.documentElement.dataset.theme=dark?'dark':'light';const m=document.querySelector('meta[name=theme-color]');if(m)m.content=dark?'#000000':'#f2f2f7';const b=document.getElementById('nightBtn');if(b)b.classList.toggle('on',dark)}
@@ -517,8 +517,8 @@ const App={
         // Mapbox: בניינים בתלת־ממד ותנועה חיה — כמו במקור
         const layers=this.map.getStyle().layers;let labelLayerId;
         for(const l of layers){if(l.type==='symbol'&&l.layout['text-field']){labelLayerId=l.id;break}}
-        this.map.addLayer({id:'3d-buildings',source:'composite','source-layer':'building',filter:['==','extrude','true'],type:'fill-extrusion',minzoom:14,paint:{'fill-extrusion-color':'#ddd','fill-extrusion-height':['get','height'],'fill-extrusion-base':['get','min_height'],'fill-extrusion-opacity':.5}},labelLayerId);
-        this.map.addSource('mapbox-traffic',{type:'vector',url:'mapbox://mapbox.mapbox-traffic-v1'});
+        if(!this.map.getLayer('3d-buildings'))this.map.addLayer({id:'3d-buildings',source:'composite','source-layer':'building',filter:['==','extrude','true'],type:'fill-extrusion',minzoom:14,paint:{'fill-extrusion-color':'#ddd','fill-extrusion-height':['get','height'],'fill-extrusion-base':['get','min_height'],'fill-extrusion-opacity':.5}},labelLayerId);
+        if(!this.map.getSource('mapbox-traffic'))this.map.addSource('mapbox-traffic',{type:'vector',url:'mapbox://mapbox.mapbox-traffic-v1'});
         this.map.addLayer({id:'traffic-line',type:'line',source:'mapbox-traffic','source-layer':'traffic',minzoom:6,layout:{'line-join':'round','line-cap':'round'},
           paint:{'line-width':['interpolate',['linear'],['zoom'],6,0.5,9,1.5,14,3,18,6],'line-color':['match',['get','congestion'],'low','#34c759','moderate','#ff9500','heavy','#ff3b30','severe','#af0000','rgba(0,0,0,0)'],'line-opacity':0.7,'line-offset':['interpolate',['linear'],['zoom'],6,0,9,0.5,14,2,18,4]}},labelLayerId);
         this._trafficVisible=true;
