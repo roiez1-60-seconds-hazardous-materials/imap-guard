@@ -220,12 +220,25 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .help-chips::-webkit-scrollbar{display:none}
 .help-chip{flex:0 0 auto;padding:7px 12px;border-radius:14px;background:var(--card);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:0.5px solid var(--sep);font-size:13px;font-weight:600;color:var(--text);cursor:pointer;box-shadow:var(--shadow-sm);font-family:inherit}
 .help-chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
-.turn{position:fixed;top:calc(var(--under-top) + var(--banners-h,0px));left:14px;right:14px;z-index:1003;display:none;align-items:center;gap:12px;background:var(--card-solid);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow-md);border:0.5px solid var(--sep)}
+.turn{position:fixed;top:calc(var(--under-top) + var(--banners-h,0px));left:14px;right:14px;z-index:1003;display:none;flex-direction:column;background:var(--card-solid);border-radius:18px;box-shadow:var(--shadow-md);border:0.5px solid var(--sep);overflow:hidden}
 .turn.active{display:flex}
-.turn-arrow{font-size:34px;line-height:1;width:44px;text-align:center}
+.turn-row{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.turn-icon{width:48px;height:48px;flex:none;color:var(--blue);display:flex;align-items:center;justify-content:center}
+.turn-icon svg{width:46px;height:46px}
 .turn-main{flex:1;min-width:0}
-.turn-dist{font-size:24px;font-weight:800;color:var(--blue);line-height:1.1}
-.turn-text{font-size:15px;font-weight:600;color:var(--text);line-height:1.25;max-height:2.5em;overflow:hidden}
+.turn-dist{font-size:26px;font-weight:800;color:var(--blue);line-height:1.05;font-variant-numeric:tabular-nums}
+.turn-text{font-size:16px;font-weight:700;color:var(--text);line-height:1.25;max-height:2.5em;overflow:hidden}
+.turn-sub{font-size:13px;font-weight:600;color:var(--text3);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.turn-lanes{display:none;direction:ltr;justify-content:center;gap:6px;padding:8px 14px 10px;border-top:0.5px solid var(--sep)}
+.turn-lanes.on{display:flex}
+.lane{width:32px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--text4);background:var(--blue-light)}
+.lane.on{color:#fff;background:var(--blue)}
+.lane svg{width:24px;height:24px}
+.turn-jam{display:none;align-items:center;gap:8px;padding:8px 14px;font-size:14px;font-weight:700;background:#ffcc00;color:#1c1c1e}
+.turn-jam.on{display:flex}
+.turn-jam.sev{background:#ff3b30;color:#fff}
+.turn-jam svg{width:20px;height:20px;flex:none}
+.turn-jam span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .turn-stop{border:0;background:var(--red-light);color:var(--red);border-radius:12px;padding:8px 12px;font-weight:700;font-family:inherit;font-size:14px;cursor:pointer}
 .btn-nav{width:100%;margin-top:8px;background:var(--blue);color:#fff;border:0;border-radius:14px;padding:11px;font-weight:800;font-size:16px;font-family:inherit;cursor:pointer;box-shadow:0 4px 16px rgba(0,122,255,0.25)}
 .credit-line{font-size:10.5px;color:var(--text3);text-align:center;margin-top:10px}
@@ -381,7 +394,7 @@ body.radar-on{--stack-h:46px}
 </div>
 
 <div class="alert" id="alert" role="status"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4M12 17h.01"/></svg><span id="alertText"></span></div>
-<div class="turn" id="turn"><div class="turn-arrow" id="turnArrow">↑</div><div class="turn-main"><div class="turn-dist" id="turnDist">—</div><div class="turn-text" id="turnText"></div></div><button class="turn-stop" id="turnStop">סיום</button></div>
+<div class="turn" id="turn"><div class="turn-row"><div class="turn-icon" id="turnIcon"></div><div class="turn-main"><div class="turn-dist" id="turnDist">—</div><div class="turn-text" id="turnText"></div><div class="turn-sub" id="turnSub"></div></div><button class="turn-stop" id="turnStop">סיום</button></div><div class="turn-lanes" id="turnLanes"></div><div class="turn-jam" id="turnJam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4M12 17.5v.01"/></svg><span id="turnJamText"></span></div></div>
 <div class="offline-pill" id="offlinePill">אין חיבור — מוצג המידע האחרון</div>
 
 <div class="search-area" id="searchArea">
@@ -541,6 +554,57 @@ function valhallaStep(m,coords){const k=VAL_MAP[m.type]||'straight',nm=(m.street
   return{loc:coords[Math.min(m.begin_shape_index||0,coords.length-1)],text:txt,arrow:ar}}
 /* Valhalla מחזיר את הקו כמחרוזת דחוסה (polyline, דיוק 6) */
 function decodePoly6(s){let i=0,lat=0,lng=0,out=[];while(i<s.length){let b,sh=0,r=0;do{b=s.charCodeAt(i++)-63;r|=(b&31)<<sh;sh+=5}while(b>=32);lat+=(r&1)?~(r>>1):(r>>1);sh=0;r=0;do{b=s.charCodeAt(i++)-63;r|=(b&31)<<sh;sh+=5}while(b>=32);lng+=(r&1)?~(r>>1):(r>>1);out.push([lng/1e6,lat/1e6])}return out}
+
+/* ═══ ניווט: כבישים ממוספרים, אייקוני פנייה, נתיבים, אייקון רכב ═══ */
+// כביש ממוספר הוא «כביש 6» — לא «רחוב 6» ולא «6» לבד (לפי רועי)
+function roadify(t){if(!t)return '';t=String(t);
+  t=t.replace(/(ל|ב)רחוב (\d{1,4})\b/g,'$1כביש $2').replace(/רחוב (\d{1,4})\b/g,'כביש $1');
+  t=t.replace(/(^|[\s/])(\d{1,4})(?=$|[\s/,.;])/g,(m,p,n,off,str)=>{const before=str.slice(0,off+p.length),after=str.slice(off+m.length);
+    if(/(כביש|יציאה|ביציאה|ה־|מספר|בעוד|עוד)\s*$/.test(before))return m;if(/^\s*(מטר|קילומטר|ק״מ|מ׳|דק|שע)/.test(after))return m;return p+'כביש '+n});
+  return t.replace(/\s*\/\s*/g,' · ').replace(/(כביש \d{1,4}) (\d+|קילומטר)/,'$1 למשך $2').replace(/\.\s*$/,'')}
+function manIcon(type,mod){mod=mod||'straight';const L=/left/.test(mod),T=type||'turn';let body;const A=(d,x='')=>`<path d="${d}" ${x}/>`;
+  if(T==='arrive')body=A('M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z')+'<circle cx="12" cy="10" r="2.2"/>';
+  else if(/roundabout|rotary/.test(T))body='<circle cx="12" cy="14.5" r="4.5"/>'+A('M12 10V3M8.5 6.5 12 3l3.5 3.5');
+  else if(T==='merge')body=A('M16 21V3','opacity=".35"')+A('M8 21v-6c0-4 3-6 8-7M12 4l4 4-4 4');
+  else if(T==='off ramp'||T==='fork'||T==='on ramp')body=A('M8 21V3','opacity=".35"')+A('M8 15c0-5 3-7 8-8h3M16 4l3 3-3 3');
+  else if(mod==='uturn')body=A('M8 21V9a4 4 0 0 1 8 0v8M12.5 14l3.5 4 3.5-4');
+  else if(/sharp/.test(mod))body=A('M8 21V8a3 3 0 0 1 6 0v10M11 14.5l3 4 3-4');
+  else if(/slight/.test(mod))body=A('M8 21v-8l7-7M9.5 6H15v5.5');
+  else if(mod==='straight')body=A('M12 21V4M6 10l6-6 6 6');
+  else body=A('M7 21v-8a4 4 0 0 1 4-4h8M15 5l4 4-4 4');
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"${L?' style="transform:scaleX(-1)"':''}>${body}</svg>`}
+function laneSvg(dirs,act,on){const P={straight:'M12 20V5M7 10l5-5 5 5',right:'M7 20v-8a3 3 0 0 1 3-3h7M14 6l3 3-3 3','slight right':'M9 20v-7l6-6M10 7h5v5','sharp right':'M8 20V8a3 3 0 0 1 6 0v8M11 13l3 4 3-4',uturn:'M8 20V9a3.5 3.5 0 0 1 7 0v6M12 12l3 3 3-3'};
+  const one=d=>{const L=/left/.test(d),k=d.replace('left','right'),p=P[k]||P.straight,dim=on&&act&&d!==act;return `<path d="${p}"${dim?' opacity=".35"':''}${L?' transform="scale(-1,1) translate(-24,0)"':''}/>`};
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${(dirs&&dirs.length?dirs:['straight']).map(one).join('')}</svg>`}
+// «היצמד לנתיב הימני» — מהנתיבים שמפבוקס מסמן כנכונים (הרשימה משמאל לימין)
+function laneHint(lanes){const n=lanes.length,on=lanes.map((l,i)=>l.on?i:-1).filter(i=>i>=0);if(!n||!on.length||on.length===n)return '';
+  const lo=on[0],hi=on[n?on.length-1:0],W={2:'לשני',3:'לשלושת',4:'לארבעת'}[on.length]||('ל־'+on.length);
+  if(on.length===1)return hi===n-1?'היצמד לנתיב הימני':lo===0?'היצמד לנתיב השמאלי':'היצמד לנתיב האמצעי';
+  if(hi===n-1)return 'היצמד '+W+' הנתיבים הימניים';if(lo===0)return 'היצמד '+W+' הנתיבים השמאליים';return 'היצמד לנתיבים האמצעיים'}
+// צעד אחיד לכל מנועי הניווט: מיקום הפנייה, אורך הקטע שאחריה, שם הכביש, טקסט, שלטים (banners) והכרזות קוליות לפי מרחק
+function normSteps(raw,kind){return raw.map((s,i)=>{const m=s.maneuver||{},type=m.type||'turn',mod=m.modifier||'straight';
+  const ref=s.ref?String(s.ref).split(';')[0].trim():'',name=s.name||'';const road=ref?'כביש '+ref+(name&&name!==ref?' · '+name:''):name;
+  const instr=roadify(m.instruction||osrmStep(s).text);
+  const banners=(s.bannerInstructions||[]).map(b=>{const sub=(b.sub&&b.sub.components)||[];const lanes=sub.filter(c=>c.type==='lane').map(c=>({dirs:c.directions||[],on:!!c.active,act:c.active_direction}));
+    return{d:b.distanceAlongGeometry,text:roadify(b.primary&&b.primary.text),sec:roadify(b.secondary&&b.secondary.text),lanes}}).sort((a,b)=>b.d-a.d);
+  let voices=(s.voiceInstructions||[]).map(v=>({d:v.distanceAlongGeometry,text:roadify(v.announcement)})).sort((a,b)=>b.d-a.d);
+  if(!voices.length){const nx=raw[i+1];if(nx){const t=roadify((nx.maneuver&&nx.maneuver.instruction)||osrmStep(nx).text);if(s.distance>700)voices.push({d:500,text:'בעוד 500 מטרים, '+t});voices.push({d:Math.min(120,s.distance*0.6),text:t})}}
+  const lb=banners.find(b=>b.lanes.length&&b.d<=3000),hint=lb?laneHint(lb.lanes):'';
+  if(hint){const v=voices.find(v=>v.d>=600&&v.d<=1300);if(v)v.text=v.text.replace(/^(בעוד [^,]+,)\s*/,'$1 '+hint+', ').replace(/, היצמד לצד (?:ימינה|שמאלה) כדי לצאת/,' וצא').replace(/, היצמד לצד (?:ימינה|שמאלה) כדי להישאר/,' והישאר').replace(/, צא ביציאה/,' וצא ביציאה').replace(/, פנה /,' ופנה ');else if(s.distance>1400)voices.push({d:1000,text:'בעוד קילומטר, '+hint});voices.sort((a,b)=>b.d-a.d)}
+  return{loc:m.location,dist:s.distance||0,dur:s.duration||0,type,mod,road,ref,name,instr,dests:s.destinations||'',banners,voices}})}
+function normValhalla(mans,coords){return normSteps(mans.map(m=>{const k=VAL_MAP[m.type]||'straight',st=valhallaStep(m,coords);let type='turn',mod=k;
+  if(k==='depart'||k==='arrive'){type=k;mod='straight'}else if(k.startsWith('ramp')){type='on ramp';mod=k.includes('left')?'slight left':'slight right'}else if(k.startsWith('exit')){type='off ramp';mod=k.includes('left')?'slight left':'slight right'}
+  else if(k.startsWith('merge')){type='merge';mod=k.includes('left')?'slight left':'slight right'}else if(k==='roundabout'||k==='exit roundabout'){type=k;mod='straight'}
+  return{maneuver:{location:st.loc,type,modifier:mod,instruction:st.text},distance:(m.length||0)*1000,duration:m.time||0,name:(m.street_names||[])[0]||''}}),'valhalla')}
+const CAR_SVG=`<svg viewBox="0 0 34 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cBody" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a52c4"/><stop offset=".45" stop-color="#3d8dff"/><stop offset="1" stop-color="#1a52c4"/></linearGradient><linearGradient id="cGlass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1a33"/><stop offset="1" stop-color="#2b4f80"/></linearGradient><radialGradient id="cBeam" cx=".5" cy="1" r=".9"><stop offset="0" stop-color="#fff5c2" stop-opacity=".85"/><stop offset="1" stop-color="#fff5c2" stop-opacity="0"/></radialGradient></defs>
+<path d="M6 12 L28 12 L34 0 L0 0 Z" fill="url(#cBeam)"/>
+<rect x="1.5" y="17" width="4" height="9" rx="2" fill="#15171a"/><rect x="28.5" y="17" width="4" height="9" rx="2" fill="#15171a"/><rect x="1.5" y="47" width="4" height="9" rx="2" fill="#15171a"/><rect x="28.5" y="47" width="4" height="9" rx="2" fill="#15171a"/>
+<rect x="4" y="10" width="26" height="52" rx="9" fill="url(#cBody)" stroke="#0c3a8c" stroke-width="1"/>
+<rect x="6.5" y="19" width="21" height="11" rx="4" fill="url(#cGlass)"/>
+<rect x="7.5" y="32" width="19" height="14" rx="2.5" fill="#2f7ce8"/><path d="M9 33.5h16" stroke="#fff" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"/>
+<rect x="6.5" y="48" width="21" height="7" rx="3" fill="url(#cGlass)"/>
+<rect x="6.5" y="12" width="6.5" height="2.8" rx="1.4" fill="#fff6c8"/><rect x="21" y="12" width="6.5" height="2.8" rx="1.4" fill="#fff6c8"/>
+<rect x="6.5" y="57.5" width="6.5" height="2.4" rx="1.2" fill="#ff3b30"/><rect x="21" y="57.5" width="6.5" height="2.4" rx="1.2" fill="#ff3b30"/></svg>`;
 
 /* ═══ DR Engine ═══ */
 const DR={
@@ -786,7 +850,7 @@ const App={
     DR.setAnchor(lat,lng);this.render();this.hideSplash();this._updateSosPos();
     try{localStorage.setItem('ig-lastpos',JSON.stringify({lat,lng,acc,t:now}))}catch(e){}
     if(this.dest&&this._routedDest!==this.dest)this.fetchRoute();
-    if(this._nav&&this.ready){const b=Number.isFinite(hdg)&&spd>1?hdg:(this.heading??this.map.getBearing());this.map.easeTo({center:[lng,lat],bearing:b,pitch:55,zoom:Math.max(this.map.getZoom(),16.5),duration:900})}
+    if(this._nav)this._navTick();
   },
 
   showSpoof(reasons,sev){document.getElementById('spoofAlert').classList.add('active');document.getElementById('spoofReasons').textContent=reasons.join(' · ');document.getElementById('spoofDetail').textContent=(sev==='high'?'🔴 חומרה גבוהה':sev==='medium'?'🟠 בינונית':'🟡 חשד')+' — משתמש במיקום אחרון אמין'},
@@ -922,7 +986,7 @@ const App={
     await this.fetchRoute();
   },
 
-  async fetchRoute(){
+  async fetchRoute(opts={}){
     if(!this.pos||!this.dest)return;
     const dest=this.dest, walking=this.routeMode==='walking';
     this._routedDest=dest; this._routeReq=(this._routeReq||0)+1; const req=this._routeReq;
@@ -933,12 +997,12 @@ const App={
     try{
       let route=null;
       if(USE_MAPBOX){
-        const extra=walking?'':'&alternatives=true&annotations=congestion';
+        const extra=walking?'':'&alternatives=true&annotations=congestion,duration,distance&banner_instructions=true&voice_instructions=true&voice_units=metric';
         const r=await(await timedFetch(`https://api.mapbox.com/directions/v5/mapbox/${this.routeMode}/${from.lng},${from.lat};${dest.lng},${dest.lat}?geometries=geojson&overview=full&steps=true&language=he${extra}&access_token=${MAPBOX_TOKEN}`,8000,ac)).json();
         if(stale())return;
         if(!r.routes||!r.routes.length){this.toast('לא נמצא מסלול');return}
-        for(const rt of r.routes)rt._steps=(rt.legs||[]).flatMap(l=>l.steps||[]).map(s=>({loc:s.maneuver.location,text:s.maneuver.instruction||osrmStep(s).text,arrow:ARROW[s.maneuver.modifier]||(s.maneuver.type==='arrive'?ARROW.arrive:'↑')}));
-        this._routes=r.routes;route=this._pick(r.routes);
+        for(const rt of r.routes)rt._steps=normSteps((rt.legs||[]).flatMap(l=>l.steps||[]),'mapbox');
+        this._routes=r.routes;route=this._chooseLive(r.routes,opts.reason);
       }
       if(!route&&walking){
         /* Valhalla: מסלול הולכי רגל אמיתי (שבילים, מדרכות) */
@@ -949,7 +1013,7 @@ const App={
           if(v.trip&&v.trip.legs&&v.trip.legs.length){
             const coords=v.trip.legs.flatMap(l=>decodePoly6(l.shape));
             route={distance:v.trip.summary.length*1000,duration:v.trip.summary.time,geometry:{type:'LineString',coordinates:coords}};
-            route._steps=(v.trip.legs[0].maneuvers||[]).map(m=>valhallaStep(m,coords));
+            route._steps=normValhalla(v.trip.legs[0].maneuvers||[],coords);
           }
         }catch(e){if(ac.signal.aborted&&ac.signal.reason==='new')return;console.warn('Valhalla',e)}
       }
@@ -962,20 +1026,21 @@ const App={
         let r=null;try{r=await res.json()}catch(e){this.toast('שירות הניווט אינו זמין כרגע, נסה שוב בעוד רגע');return}
         if(stale())return;
         if(!r.routes||!r.routes.length){this.toast('לא נמצא מסלול');return}
-        for(const rt of r.routes){rt._steps=(rt.legs||[]).flatMap(l=>l.steps||[]).map(osrmStep);if(walking)rt.duration=rt.distance/1.39}
-        this._routes=r.routes;route=this._pick(r.routes);
+        for(const rt of r.routes){rt._steps=normSteps((rt.legs||[]).flatMap(l=>l.steps||[]),'osrm');if(walking)rt.duration=rt.distance/1.39}
+        this._routes=r.routes;route=this._chooseLive(r.routes,opts.reason);
       }
       if(stale())return;
       if(!this._routes||!this._routes.includes(route))this._routes=[route];   // מסלול הליכה או חלופה יחידה — לא לערבב עם מסלולי הנסיעה הקודמים
-      this._routeFrom=from;this._applyRoute(route,walking);
+      this._routeFrom=from;this._applyRoute(route,walking,{quiet:this._liveQuiet});
       this._routeGeo=route.geometry;
+      if(this._liveMsg){const m=this._liveMsg;this._liveMsg=null;this.toast(m);this._say(m,true)}
       // Fit bounds — הריפוד לפי הגובה האמיתי של הלוח התחתון ושדה החיפוש
       const coords=route.geometry.coordinates;
       if(this.map&&coords.length&&!this._nav){
         const bounds=coords.reduce((b,c)=>b.extend(c),new GL.LngLatBounds(coords[0],coords[0]));
         this.map.fitBounds(bounds,{padding:this._padding(),duration:1000});
       }
-      if(this._nav)this._updateTurn();
+      if(this._nav)this._navTick();
       this.updateNavInfo();
     }catch(e){
       if(stale()||(ac.signal.aborted&&ac.signal.reason==='new'))return;
@@ -989,6 +1054,23 @@ const App={
     const fast=routes.reduce((a,b)=>b.duration<a.duration?b:a),short=routes.reduce((a,b)=>b.distance<a.distance?b:a);
     return (this._routePref==='short')?short:fast;   // בחלופה שאינה המהירה/הקצרה חוזרים למהיר בחישוב מחדש
   },
+  /* חישוב חי בזמן ניווט: אותו מסלול עם פקקים מעודכנים — בשקט; מסלול מהיר יותר ב־2 דק׳ ומעלה — מודיעים ועוברים; ירדנו מהמסלול — מחשבים מחדש */
+  _chooseLive(routes,reason){
+    this._liveQuiet=false;this._liveMsg=null;
+    if(!this._nav||!this._routeGeo||!this._cum)return this._pick(routes);
+    const best=this._pick(routes),same=this._sameRoute(routes);
+    if(reason==='refresh'&&same){
+      if(best!==same&&same.duration-best.duration>=Math.max(120,0.08*same.duration)){this._liveMsg='נמצא מסלול מהיר יותר — חוסך '+Math.round((same.duration-best.duration)/60)+' דקות';return best}
+      this._liveQuiet=true;return same;
+    }
+    if(reason==='refresh'||reason==='offroute'){this._liveMsg=same?null:'המסלול חושב מחדש';this._liveQuiet=!!same;return same||best}
+    return best;
+  },
+  _sameRoute(routes){
+    const c=this._routeGeo.coordinates,set=new Set();for(let i=this._me||0;i<c.length;i++)set.add(c[i][0].toFixed(5)+','+c[i][1].toFixed(5));
+    let bestR=null,bs=0;for(const r of routes){const g=r.geometry.coordinates;let hit=0,n=0;for(let i=0;i<g.length;i+=3){n++;if(set.has(g[i][0].toFixed(5)+','+g[i][1].toFixed(5)))hit++}const sc=n?hit/n:0;if(sc>bs){bs=sc;bestR=r}}
+    return bs>=0.8?bestR:null;
+  },
   _fmtT(s){const m=Math.round(s/60);return m<60?m+' דק׳':Math.floor(m/60)+' שע׳ '+m%60+' דק׳'},
   _fmtD(d){return d<1000?Math.round(d)+' מ׳':(d/1000).toFixed(1)+' ק״מ'},
   _segFC(route){
@@ -999,10 +1081,12 @@ const App={
     if(pts.length>1)f.push({type:'Feature',properties:{c:cur},geometry:{type:'LineString',coordinates:pts}});
     return{type:'FeatureCollection',features:f};
   },
-  _applyRoute(route,walking){
+  _applyRoute(route,walking,o={}){
     const rs=this._routes||[route];
-    this._routeGeo=route.geometry;this._steps=route._steps||[];this._stepIdx=0;
-    this._routeFC=this._segFC(route);this._cong=(route.legs||[]).flatMap(l=>(l.annotation&&l.annotation.congestion)||[]);this._jamWarnIdx=null;if(!walking)this._loadCameras(route);else this._cams=[];
+    this._routeGeo=route.geometry;this._steps=route._steps||[];this._stepIdx=-1;this._spk={};this._lanesKey=null;this._jamSaid=false;
+    if(this._nav){this._skipDepart=true;this._quiet=!!o.quiet}
+    this._prepRoute(route);
+    this._routeFC=this._segFC(route);if(!walking)this._loadCameras(route);else this._cams=[];
     this._altFC={type:'FeatureCollection',features:rs.filter(r=>r!==route).map(r=>({type:'Feature',properties:{},geometry:r.geometry}))};
     if(this.map&&this.map.getSource('route')){this.map.getSource('route').setData(this._routeFC);this.map.getSource('route-alt').setData(this._altFC)}
     // בורר המהיר/הקצר — רק כשיש באמת שני מסלולים שונים
@@ -1023,7 +1107,41 @@ const App={
     document.getElementById('navDistance').textContent=this._fmtD(route.distance).replace(' מ׳',' מטר');
     const hasCong=(route.legs||[]).some(l=>l.annotation&&l.annotation.congestion);
     document.getElementById('navTime').textContent=this._fmtT(route.duration).replace('דק׳','דקות')+(walking?' הליכה':hasCong?' נסיעה · לפי פקקים':' נסיעה');
-    if(this._nav)this._updateTurn();
+    if(this._nav)this._navTick();
+  },
+  /* מרחק מצטבר לאורך הקו, תחילת כל צעד על הקו, ונתוני הזמן/עומס לכל קטע */
+  _prepRoute(route){
+    const c=route.geometry.coordinates,cum=[0];for(let i=1;i<c.length;i++)cum[i]=cum[i-1]+this.dist(c[i-1][1],c[i-1][0],c[i][1],c[i][0]);
+    let k=0;const starts=(route._steps||[]).map(s=>{if(!s.loc)return k;let best=1e9,bi=k;for(let i=k;i<c.length;i++){const d=this.dist(s.loc[1],s.loc[0],c[i][1],c[i][0]);if(d<best){best=d;bi=i}if(d<1)break}k=bi;return bi});
+    this._cum=cum;this._starts=starts;this._me=0;this._along=0;this._off=null;this._offCnt=0;
+    const a={dur:[],dist:[],cong:[]};for(const l of (route.legs||[])){const n=l.annotation||{};a.dur.push(...(n.duration||[]));a.dist.push(...(n.distance||[]));a.cong.push(...(n.congestion||[]))}
+    this._ann=(a.dur.length===c.length-1&&a.dist.length===c.length-1)?a:null;this._cong=a.cong;
+  },
+  /* המיקום על הקו: הקודקוד הקרוב (חיפוש בחלון סביב הקודם) והטלה על הקטע — כדי שהמרחק לפנייה יהיה רציף */
+  _locate(){
+    const c=(this._routeGeo||{}).coordinates;if(!c||!this.pos||c.length<2||!this._cum)return null;const{lat,lng}=this.pos;
+    const scan=(a,b)=>{let best=1e9,bi=a;for(let i=a;i<b;i++){const d=this.dist(lat,lng,c[i][1],c[i][0]);if(d<best){best=d;bi=i}}return{best,bi}};
+    let r=scan(Math.max(0,(this._me||0)-40),Math.min(c.length,(this._me||0)+400));if(r.best>120){const f=scan(0,c.length);if(f.best<40||f.best<r.best*0.5)r=f}
+    let me=r.bi,off=r.best,along=this._cum[me];
+    const kx=Math.cos(lat*Math.PI/180);
+    const proj=i=>{if(i<0||i+1>=c.length)return null;const ax=c[i][0],ay=c[i][1],bx=c[i+1][0],by=c[i+1][1];const vx=(bx-ax)*kx,vy=by-ay,wx=(lng-ax)*kx,wy=lat-ay,L=vx*vx+vy*vy;if(!L)return null;let t=(wx*vx+wy*vy)/L;t=Math.max(0,Math.min(1,t));return{t,i,d:this.dist(lat,lng,ay+(by-ay)*t,ax+(bx-ax)*t)}};
+    for(const p of [proj(me),proj(me-1)]){if(p&&p.d<=off){off=p.d;along=this._cum[p.i]+(this._cum[p.i+1]-this._cum[p.i])*p.t;me=p.i}}
+    this._me=me;this._along=along;this._off=off;return{me,along,off};
+  },
+  /* פקק לפניך: הקטע הרצוף הראשון של עומס כבד/חמור עד 3 ק״מ קדימה — אורכו ומשך הנסיעה בו לפי מפבוקס */
+  _jamInfo(){
+    const a=this._ann,c=(this._routeGeo||{}).coordinates;if(!a||!c||!a.cong.length)return null;const me=this._me||0,al=this._along||0,bad=v=>v==='heavy'||v==='severe';
+    let j=-1,ahead=0;for(let i=me;i<a.cong.length;i++){if(bad(a.cong[i])){j=i;break}ahead+=this._cum[i+1]-Math.max(al,this._cum[i]);if(ahead>3000)return null}
+    if(j<0)return null;let dist=0,dur=0,gap=0,sev=false;
+    for(let k=j;k<a.cong.length;k++){const v=a.cong[k];if(bad(v)||v==='moderate'){gap=0;if(v==='severe')sev=true}else{gap+=a.dist[k];if(gap>250)break}dist+=a.dist[k];dur+=a.dur[k]}
+    const inside=j===me||ahead<15;if(inside){const seg=this._cum[me+1]-this._cum[me];if(seg>0){const f=Math.min(1,(al-this._cum[me])/seg);dist-=a.dist[me]*f;dur-=a.dur[me]*f}}
+    return{ahead:inside?0:ahead,dist:Math.max(0,dist),dur:Math.max(0,dur),sev,inside};
+  },
+  _updateJam(){
+    const el=document.getElementById('turnJam'),j=this._jamInfo();if(!j||j.dur<45||j.dist<80){el.classList.remove('on');return}
+    const mins=Math.max(1,Math.round(j.dur/60));
+    document.getElementById('turnJamText').textContent=j.inside?'בעומס · עוד '+this._fmtD(j.dist)+' · כ־'+mins+' דק׳ עד היציאה מהפקק':(j.sev?'פקק כבד':'עומס תנועה')+' בעוד '+(j.ahead<1000?Math.max(50,Math.round(j.ahead/50)*50)+' מ׳':this._fmtD(j.ahead))+' · '+this._fmtD(j.dist)+' · כ־'+mins+' דק׳';
+    el.classList.toggle('sev',j.sev);el.classList.add('on');
   },
   setRoutePref(pref){
     this._routePref=pref;
@@ -1038,8 +1156,7 @@ const App={
     if(this._routedDest!==this.dest||!this._routeFrom)document.getElementById('navDistance').textContent=ds;
     document.getElementById('navBearing').textContent='כיוון: '+this.heb(b)+' · '+Math.round(b)+'° · '+ds+' בקו אווירי';
     // זזנו יותר מ־100 מ׳ מנקודת חישוב המסלול — מחשבים מחדש (לא יותר מפעם ב־10 שנ׳)
-    if(this._routeFrom&&this.dist(this.pos.lat,this.pos.lng,this._routeFrom.lat,this._routeFrom.lng)>100&&Date.now()-this._routeFrom.t>10000){this._routeFrom.t=Date.now();this.fetchRoute()}
-    if(this._nav){this._updateTurn();this._checkAlerts();this._updateNavBar()}
+    if(!this._nav&&this._routeFrom&&this.dist(this.pos.lat,this.pos.lng,this._routeFrom.lat,this._routeFrom.lng)>100&&Date.now()-this._routeFrom.t>30000){this._routeFrom.t=Date.now();this.fetchRoute()}
   },
 
   /* ═══ ניווט פעיל: כרטיס הפנייה הבאה, מצלמה עוקבת, מסך דולק ═══ */
@@ -1052,12 +1169,11 @@ const App={
     return{top,bottom,left:40,right:40};
   },
   _remaining(){
-    const c=(this._routeGeo||{}).coordinates;if(!c||!this.pos)return null;
-    let best=1e9,me=0;for(let i=0;i<c.length;i++){const d=this.dist(this.pos.lat,this.pos.lng,c[i][1],c[i][0]);if(d<best){best=d;me=i}}
-    let rem=0;for(let i=me;i<c.length-1;i++)rem+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);
-    const rs=(this._routes||[]);const r=rs.find(x=>x.geometry===this._routeGeo)||rs[0];
-    const total=r?r.distance:rem,dur=r?r.duration:0;
-    return{dist:rem,time:total>0?dur*rem/total:0};
+    const c=(this._routeGeo||{}).coordinates;if(!c||!this.pos||!this._cum)return null;const q=this._locate();if(!q)return null;
+    const rem=Math.max(0,this._cum[c.length-1]-q.along);let time;
+    if(this._ann){let t=0;for(let i=q.me;i<this._ann.dur.length;i++)t+=this._ann.dur[i];const seg=this._cum[q.me+1]-this._cum[q.me];if(seg>0)t-=this._ann.dur[q.me]*Math.min(1,(q.along-this._cum[q.me])/seg);time=Math.max(0,t)}
+    else{const rs=(this._routes||[]);const r=rs.find(x=>x.geometry===this._routeGeo)||rs[0];time=r&&r.distance>0?r.duration*rem/r.distance:0}
+    return{dist:rem,time};
   },
   _updateNavBar(){
     const q=this._remaining();if(!q)return;
@@ -1066,15 +1182,65 @@ const App={
     document.getElementById('nbEta').textContent='הגעה '+eta.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('nbDist').textContent=this._fmtD(q.dist);
   },
+  /* כל תיקון מיקום בניווט: כרטיס הפנייה, התראות, שורת הזמן, ירידה מהמסלול */
+  _navTick(){
+    if(!this._nav)return;this._updateTurn();if(!this._nav)return;this._checkAlerts();this._updateNavBar();
+    if(this._off!=null&&this.pos){if(this._off>60&&this.pos.acc<80)this._offCnt=(this._offCnt||0)+1;else this._offCnt=0;
+      if(this._offCnt>=2&&Date.now()-(this._reT||0)>15000){this._reT=Date.now();this._offCnt=0;this.fetchRoute({reason:'offroute'})}}
+  },
+  _navRefresh(){if(!this._nav||!USE_MAPBOX||this.routeMode==='walking'||!navigator.onLine||!this.pos||Date.now()-this.pos.t>20000)return;this.fetchRoute({reason:'refresh'})},
   _updateTurn(){
-    const st=this._steps||[];if(!this.pos||!st.length){return}
-    while(this._stepIdx<st.length-1&&this.dist(this.pos.lat,this.pos.lng,st[this._stepIdx].loc[1],st[this._stepIdx].loc[0])<25)this._stepIdx++;
-    const s=st[this._stepIdx];const d=this.dist(this.pos.lat,this.pos.lng,s.loc[1],s.loc[0]);
-    document.getElementById('turnArrow').textContent=s.arrow;
-    document.getElementById('turnDist').textContent=d<1000?Math.round(d/10)*10+' מ׳':(d/1000).toFixed(1)+' ק״מ';
-    document.getElementById('turnText').textContent=s.text;
-    if(this._spokenIdx!==this._stepIdx&&d<250){this._spokenIdx=this._stepIdx;this._say(s.text)}
-    if(this._stepIdx===st.length-1&&d<30){this.toast('🏁 הגעת ליעד');this.stopNav()}
+    const st=this._steps||[];if(!this.pos||st.length<2||!this._cum||!this._starts)return;const q=this._locate();if(!q)return;this._spk=this._spk||{};
+    // הצעד שאנחנו נוסעים בו: האחרון שתחילתו מאחורינו (8 מ׳ היסטרזיס קדימה, 30 אחורה)
+    let i=Math.max(0,this._stepIdx);while(i<st.length-2&&q.along>=this._cum[this._starts[i+1]]+2)i++;while(i>0&&q.along<this._cum[this._starts[i]]-30)i--;
+    if(i!==this._stepIdx){this._stepIdx=i;this._enterStep(i,q)}
+    const cur=st[i],nx=st[i+1],dNext=Math.max(0,this._cum[this._starts[i+1]]-q.along);this._dNext=dNext;
+    // רחוק מהפנייה: «המשך בכביש 6 · עוד 93 ק״מ עד …»; קרוב: הפנייה עצמה + לאן + נתיבים
+    const far=dNext>1500&&!!cur.road;
+    const ban=cur.banners.length?(cur.banners.filter(b=>b.d>=dNext).sort((a,b)=>a.d-b.d)[0]||cur.banners[0]):null;
+    const parts=(nx.instr||'').split(' לכיוון ');let text,sub;
+    if(far){text='המשך ב'+cur.road;sub='עוד '+(dNext>=10000?Math.round(dNext/1000)+' ק״מ':this._fmtD(dNext))+' עד: '+parts[0]}
+    else{text=parts[0]||nx.road;sub=parts[1]?'לכיוון '+parts[1]:(ban&&ban.sec?'לכיוון '+ban.sec:(nx.road&&!text.includes(nx.road)?nx.road:''))}
+    const iconKey=far?'straight':nx.type+'|'+nx.mod;if(this._iconKey!==iconKey){this._iconKey=iconKey;document.getElementById('turnIcon').innerHTML=far?manIcon('turn','straight'):manIcon(nx.type,nx.mod)}
+    document.getElementById('turnDist').textContent=dNext<1000?Math.max(0,Math.round(dNext/10)*10)+' מ׳':(dNext/1000).toFixed(dNext<10000?1:0)+' ק״מ';
+    document.getElementById('turnText').textContent=text;const se=document.getElementById('turnSub');se.textContent=sub;se.style.display=sub?'':'none';
+    // נתיבים — מ־1.5 ק״מ לפני הפנייה (כמו בוויז)
+    const lanesEl=document.getElementById('turnLanes');const lanes=(ban&&ban.lanes.length?ban.lanes:(cur.banners.find(b=>b.lanes.length)||{}).lanes)||[];
+    if(!far&&lanes.length&&dNext<=1500){const key=i+':'+lanes.map(l=>l.dirs.join('|')+(l.on?'*':'')).join(',');if(this._lanesKey!==key){this._lanesKey=key;lanesEl.innerHTML=lanes.map(l=>'<div class="lane'+(l.on?' on':'')+'">'+laneSvg(l.dirs,l.act,l.on)+'</div>').join('')}lanesEl.classList.add('on')}
+    else{lanesEl.classList.remove('on');this._lanesKey=null}
+    // הכרזה קולית לפי לוח המרחקים של המסלול (המשך X ק״מ / בעוד 3 ק״מ / בעוד 800 מ׳ / עכשיו)
+    for(let k=0;k<cur.voices.length;k++){const v=cur.voices[k],key=i+':'+k;if(dNext<=v.d+5&&!this._spk[key]){this._spk[key]=1;this._say(v.text);break}}
+    this._updateJam();
+    if(i===st.length-2&&dNext<25){this._say('הגעת ליעד',true);this.toast('🏁 הגעת ליעד');this.stopNav(true);return}
+    this._navCam(dNext);
+  },
+  _enterStep(i,q){
+    const cur=this._steps[i],dNext=this._cum[this._starts[i+1]]-q.along;
+    if(i===0&&this._skipDepart){cur.voices.forEach((v,k)=>this._spk['0:'+k]=1);this._skipDepart=false;return}
+    if(this._quiet){cur.voices.forEach((v,k)=>{if(v.d>=dNext-60)this._spk[i+':'+k]=1});this._quiet=false;return}
+    // הצטרפות באמצע צעד (חישוב מחדש): מדלגים על ההכרזות שכבר עברנו, חוץ מהאחרונה שבהן — היא תישמע מייד
+    const past=cur.voices.map((v,k)=>({v,k})).filter(x=>x.v.d>dNext+30);past.slice(0,-1).forEach(x=>this._spk[i+':'+x.k]=1);
+  },
+  /* המצלמה בניווט: מבט רחוק בכביש מהיר, התקרבות הדרגתית מ־1.5 ק״מ לפני הפנייה, וחזרה אחריה. הרכב בשליש התחתון של המסך */
+  _navCam(dNext){
+    if(!this.ready||!this.pos)return;const{lat,lng,spd,hdg}=this.pos,v=spd>0?spd:0;
+    this._spdS=this._spdS==null?v:this._spdS*0.7+v*0.3;const sv=this._spdS;
+    const base=sv>=24?14.0:sv>=15?14.8:sv>=7?15.7:16.4;
+    let z=base;if(dNext<1500){const t=Math.max(0,Math.min(1,(1500-dNext)/1250));z=base+(17-base)*t}
+    if(this._camZ==null)this._camZ=z;else this._camZ+=Math.max(-0.5,Math.min(0.5,z-this._camZ));z=this._camZ;
+    const pitch=z>=16.3?60:z>=15.2?55:48;
+    const b=Number.isFinite(hdg)&&v>1?hdg:(this.heading??this.map.getBearing());
+    const h=this.map.getContainer().clientHeight;
+    this.map.easeTo({center:[lng,lat],bearing:b,pitch,zoom:z,padding:{top:0,left:0,right:0,bottom:Math.round(h*0.3)},duration:950,easing:t=>t,essential:true});
+    if(this._carRot)this._carRot(b);
+  },
+  /* בניווט: רכב מלמעלה במקום הנקודה הכחולה, מסתובב עם כיוון הנסיעה ושוכב על המפה */
+  _setCar(on){
+    const el=document.getElementById('userMarker');if(!el||!this.marker)return;let car=document.getElementById('uCar');
+    if(!car){car=document.createElement('div');car.id='uCar';car.innerHTML=CAR_SVG;car.style.cssText='position:absolute;top:50%;left:50%;width:34px;height:64px;transform:translate(-50%,-50%);display:none;z-index:4;filter:drop-shadow(0 3px 4px rgba(0,0,0,.45))';el.firstElementChild.appendChild(car)}
+    car.style.display=on?'block':'none';const core=document.getElementById('uCore');if(core)core.style.display=on?'none':'';const cone=document.getElementById('uCone');if(on&&cone)cone.style.display='none';
+    try{this.marker.setRotationAlignment(on?'map':'viewport');this.marker.setPitchAlignment(on?'map':'viewport');if(!on)this.marker.setRotation(0)}catch(e){}
+    this._carRot=on?(b=>{try{this.marker.setRotation(b)}catch(e){}}):null;
   },
   /* ═══ התראות בנסיעה: מצלמות מהירות (OpenStreetMap) ופקק לפניך (עומס לפי מפבוקס לאורך המסלול) ═══ */
   async _loadCameras(route){
@@ -1096,21 +1262,25 @@ const App={
     let best=1e9,me=0;for(let i=0;i<c.length;i++){const d=this.dist(this.pos.lat,this.pos.lng,c[i][1],c[i][0]);if(d<best){best=d;me=i}}
     const ahead=(idx)=>{let m=0;for(let i=me;i<idx&&i<c.length-1;i++)m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);return m};
     for(const cam of (this._cams||[])){if(cam.warned||cam.idx<me)continue;const d=ahead(cam.idx);if(d<=320){cam.warned=true;const msg='מצלמת מהירות בעוד '+Math.round(d/10)*10+' מ׳'+(cam.maxspeed?' · מותר '+cam.maxspeed:'');this.showAlert(msg,false)}}
-    const cong=this._cong||[];if(cong.length){let m=0;for(let i=me;i<c.length-1&&m<1000;i++){m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);const v=cong[i];if((v==='heavy'||v==='severe')&&(this._jamWarnIdx==null||i>this._jamWarnIdx+20)){this._jamWarnIdx=i;const msg=(v==='severe'?'פקק כבד':'עומס תנועה')+' בעוד '+Math.round(m/50)*50+' מ׳';this.showAlert(msg,v==='severe');break}}}
+    const j=this._jamInfo();
+    if(j&&!j.inside&&j.ahead<=1000&&j.dur>=45&&!this._jamSaid){this._jamSaid=true;this.showAlert((j.sev?'פקק כבד':'עומס תנועה')+' בעוד '+Math.round(j.ahead/50)*50+' מטר · '+this._fmtD(j.dist)+' · כ־'+Math.max(1,Math.round(j.dur/60))+' דקות',j.sev)}
+    if(!j)this._jamSaid=false;
   },
-  _say(txt){try{if(!('speechSynthesis'in window))return;const u=new SpeechSynthesisUtterance(txt);u.lang='he-IL';const v=speechSynthesis.getVoices().find(v=>/^he/i.test(v.lang));if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},
+  _say(txt,prio){try{if(!('speechSynthesis'in window)||!txt)return;const u=new SpeechSynthesisUtterance(txt);u.lang='he-IL';const v=speechSynthesis.getVoices().find(v=>/^he/i.test(v.lang));if(v)u.voice=v;
+    if(prio||(speechSynthesis.speaking&&this._sayT&&Date.now()-this._sayT>12000))speechSynthesis.cancel();this._sayT=Date.now();this._lastSaid=txt;speechSynthesis.speak(u)}catch(e){}},
   async startNav(){
     if(!this.dest){this.toast('⚠️ בחר יעד');return}
     if(!this.pos){this.toast('⚠️ אין עדיין מיקום');this.locate();return}
     if(this._askMotion)this._askMotion();
-    this._nav=true;this._stepIdx=0;this._spokenIdx=-1;
+    this._nav=true;this._stepIdx=-1;this._spk={};this._lanesKey=null;this._iconKey=null;this._camZ=null;this._spdS=null;this._skipDepart=false;this._quiet=false;
     document.getElementById('turn').classList.add('active');document.getElementById('searchArea').classList.add('navhide');document.body.classList.add('navon');
     document.getElementById('btnNavT').textContent='עצור ניווט';
     if(!this.tracking)this.startTrack();
     await this._keepAwake();
-    if(this.ready){const b=this.heading??0;this.map.easeTo({center:[this.pos.lng,this.pos.lat],bearing:b,pitch:55,zoom:16.5,duration:900})}
+    this._setCar(true);
     if(!this._steps||!this._steps.length)await this.fetchRoute();
-    this._updateTurn();this._updateNavBar();
+    clearInterval(this._refreshT);this._refreshT=setInterval(()=>this._navRefresh(),60000);
+    this._navTick();
   },
   /* המסך נשאר דולק בזמן ניווט; המערכת משחררת את הנעילה כשעוברים לאפליקציה אחרת — מחדשים בחזרה */
   async _keepAwake(){
@@ -1118,13 +1288,14 @@ const App={
     try{this._wake=await navigator.wakeLock.request('screen');this._wake.addEventListener('release',()=>{this._wake=null});if(!this._wakeHooked){this._wakeHooked=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&this._nav&&!this._wake)this._keepAwake()})}}
     catch(e){if(!this._wakeWarned){this._wakeWarned=true;this.toast('המכשיר לא מאפשר להשאיר את המסך דולק — בטל נעילה אוטומטית בהגדרות')}}
   },
-  stopNav(){
-    this._nav=false;
+  stopNav(arrived){
+    this._nav=false;clearInterval(this._refreshT);this._setCar(false);
+    document.getElementById('turnLanes').classList.remove('on');document.getElementById('turnJam').classList.remove('on');
     document.getElementById('turn').classList.remove('active');document.getElementById('alert').classList.remove('active');document.getElementById('sheet').classList.remove('navopts');document.getElementById('searchArea').classList.remove('navhide');document.body.classList.remove('navon');
     document.getElementById('btnNavT').textContent='התחל ניווט';
     try{if(this._wake){this._wake.release();this._wake=null}}catch(e){}
-    try{speechSynthesis.cancel()}catch(e){}
-    if(this.ready)this.map.easeTo({pitch:0,bearing:0,duration:600});
+    if(!arrived)try{speechSynthesis.cancel()}catch(e){}
+    if(this.ready)this.map.easeTo({pitch:0,bearing:0,padding:{top:0,bottom:0,left:0,right:0},duration:600});
     setTimeout(()=>this._placeRadar(),700);
   },
 
@@ -1223,7 +1394,7 @@ const App={
     document.getElementById('navPanel').classList.remove('active');document.querySelector('.sheet').classList.remove('hasdest');
     document.getElementById('searchInput').value='';
     document.getElementById('navTime').textContent='';
-    this._routedDest=null;this._routeFrom=null;this._routeGeo=null;this._steps=[];if(this._routeAC)this._routeAC.abort('new');
+    this._routedDest=null;this._routeFrom=null;this._routeGeo=null;this._steps=[];this._cum=null;this._starts=null;this._ann=null;if(this._routeAC)this._routeAC.abort('new');
     if(this._nav)this.stopNav();
   },
 
