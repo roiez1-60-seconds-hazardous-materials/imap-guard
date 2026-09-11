@@ -1060,7 +1060,16 @@ const App={
     if(!this._nav||!this._routeGeo||!this._cum)return this._pick(routes);
     const best=this._pick(routes),same=this._sameRoute(routes);
     if(reason==='refresh'&&same){
-      if(best!==same&&same.duration-best.duration>=Math.max(120,0.08*same.duration)){this._liveMsg='נמצא מסלול מהיר יותר — חוסך '+Math.round((same.duration-best.duration)/60)+' דקות';return best}
+      /* לא מחליפים מסלול על כל שיפור קטן (רועי: שלא יטריד): רק חיסכון של 5 דק׳ ומעלה ולפחות 15% מהזמן שנותר,
+         שמחזיק בשתי בדיקות רצופות (דקה זו אחר זו), לא בתוך 1.5 ק״מ לפני פנייה, ולא יותר מפעם ב־10 דק׳ (אלא אם החיסכון 10 דק׳+).
+         חיסכון של 3–5 דק׳ מקבל הודעה שקטה אחת, בלי קול — המסלול המהיר מופיע באפשרויות */
+      const now=Date.now(),save=same.duration-best.duration,big=save>=Math.max(300,0.15*same.duration),huge=save>=600,nearTurn=(this._dNext||1e9)<1500;
+      if(best!==same&&big&&!nearTurn){
+        this._betterN=(this._betterN||0)+1;
+        const cool=now-(this._switchT||0)<600000&&!huge;
+        if(this._betterN>=2&&!cool){this._switchT=now;this._betterN=0;this._liveMsg='נמצא מסלול מהיר יותר — חוסך '+Math.round(save/60)+' דקות';return best}
+      }else this._betterN=0;
+      if(best!==same&&save>=180&&!big&&now-(this._hintT||0)>600000){this._hintT=now;this.toast('יש מסלול מהיר יותר ב־'+Math.round(save/60)+' דק׳ — ראה באפשרויות')}
       this._liveQuiet=true;return same;
     }
     if(reason==='refresh'||reason==='offroute'){this._liveMsg=same?null:'המסלול חושב מחדש';this._liveQuiet=!!same;return same||best}
