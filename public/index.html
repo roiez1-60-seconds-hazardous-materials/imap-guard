@@ -226,22 +226,32 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .turn-icon{width:48px;height:48px;flex:none;color:var(--blue);display:flex;align-items:center;justify-content:center}
 .turn-icon svg{width:46px;height:46px}
 .turn-main{flex:1;min-width:0}
-.turn-dist{font-size:26px;font-weight:800;color:var(--blue);line-height:1.05;font-variant-numeric:tabular-nums}
-.turn-text{font-size:16px;font-weight:700;color:var(--text);line-height:1.25;max-height:2.5em;overflow:hidden}
-.turn-sub{font-size:13px;font-weight:600;color:var(--text3);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.turn-dist{font-size:28px;font-weight:800;color:var(--blue);line-height:1.05;font-variant-numeric:tabular-nums}
+.turn-text{font-size:18px;font-weight:700;color:var(--text);line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.turn-sub{font-size:15px;font-weight:600;color:var(--text2);line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;margin-top:3px}
 .turn-lanes{display:none;direction:ltr;justify-content:center;gap:6px;padding:8px 14px 10px;border-top:0.5px solid var(--sep)}
 .turn-lanes.on{display:flex}
 .lane{width:32px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--text4);background:var(--blue-light)}
 .lane.on{color:#fff;background:var(--blue)}
 .lane svg{width:24px;height:24px}
-.turn-jam{display:none;align-items:center;gap:8px;padding:8px 14px;font-size:14px;font-weight:700;background:#ffcc00;color:#1c1c1e}
+.turn-jam{display:none;align-items:center;gap:8px;padding:8px 14px;font-size:15px;font-weight:700;background:#ffcc00;color:#1c1c1e}
+.alt-row{display:none;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;font-size:14px;font-weight:600;color:var(--text2)}
+body.navon .alt-row{display:flex}
+.alt-row button{border:0;background:var(--blue-light);color:var(--blue);border-radius:10px;padding:7px 12px;font-weight:800;font-family:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
 .turn-jam.on{display:flex}
 .turn-jam.sev{background:#ff3b30;color:#fff}
 .turn-jam svg{width:20px;height:20px;flex:none}
-.turn-jam span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.turn-jam span{flex:1;min-width:0;line-height:1.25}
 .turn-stop{border:0;background:var(--red-light);color:var(--red);border-radius:12px;padding:8px 12px;font-weight:700;font-family:inherit;font-size:14px;cursor:pointer}
 .btn-nav{width:100%;margin-top:8px;background:var(--blue);color:#fff;border:0;border-radius:14px;padding:11px;font-weight:800;font-size:16px;font-family:inherit;cursor:pointer;box-shadow:0 4px 16px rgba(0,122,255,0.25)}
 .credit-line{font-size:10.5px;color:var(--text3);text-align:center;margin-top:10px}
+.speed{position:fixed;right:14px;bottom:calc(var(--sheet-h,180px) + 64px);z-index:1002;display:none;width:66px;height:66px}
+.speed.on{display:block}
+.spd-now{width:66px;height:66px;border-radius:50%;background:var(--card-solid);border:0.5px solid var(--sep);box-shadow:var(--shadow-md);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text);line-height:1}
+.spd-now b{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums}
+.spd-now small{font-size:10px;font-weight:700;color:var(--text3);margin-top:2px}
+.speed.over .spd-now{background:#ff3b30;color:#fff;border-color:#ff3b30}.speed.over .spd-now small{color:#fff}
+.spd-lim{position:absolute;top:-10px;left:-10px;width:32px;height:32px;border-radius:50%;background:#fff;border:3.5px solid #e0242d;color:#111;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.3);font-variant-numeric:tabular-nums}
 .offline-pill{position:fixed;bottom:calc(var(--sheet-h,300px) + 10px);left:14px;z-index:1004;background:#1c1c1e;color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:12px;display:none}
 .offline-pill.active{display:block}
 @media (orientation:landscape) and (max-height:520px){
@@ -395,6 +405,7 @@ body.radar-on{--stack-h:46px}
 
 <div class="alert" id="alert" role="status"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4M12 17h.01"/></svg><span id="alertText"></span></div>
 <div class="turn" id="turn"><div class="turn-row"><div class="turn-icon" id="turnIcon"></div><div class="turn-main"><div class="turn-dist" id="turnDist">—</div><div class="turn-text" id="turnText"></div><div class="turn-sub" id="turnSub"></div></div><button class="turn-stop" id="turnStop">סיום</button></div><div class="turn-lanes" id="turnLanes"></div><div class="turn-jam" id="turnJam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4M12 17.5v.01"/></svg><span id="turnJamText"></span></div></div>
+<div class="speed" id="speed" aria-label="מהירות"><div class="spd-now"><b id="spdNow">0</b><small>קמ״ש</small></div><div class="spd-lim" id="spdLim"></div></div>
 <div class="offline-pill" id="offlinePill">אין חיבור — מוצג המידע האחרון</div>
 
 <div class="search-area" id="searchArea">
@@ -437,7 +448,7 @@ body.radar-on{--stack-h:46px}
 
 <div class="sheet collapsed" id="sheet">
   <div class="sheet-grip" id="sheetGrip" role="button" aria-label="הרחב או כווץ"></div>
-  <div class="navbar" id="navbar"><div class="nb"><div><b id="nbTime">—</b><small id="nbEta"></small></div><span id="nbDist"></span></div><div class="nb-btns"><button class="nb-opts" id="nbOpts">אפשרויות</button><button class="nb-stop" id="nbStop">עצור</button></div></div>
+  <div class="navbar" id="navbar"><div class="nb"><div><b id="nbTime">—</b><small id="nbEta"></small></div><span id="nbDist"></span></div><div class="nb-btns"><button class="nb-opts" id="nbOpts">מסלולים</button><button class="nb-stop" id="nbStop">עצור</button></div></div>
   <div class="nav-panel" id="navPanel">
     <div class="route-modes seg">
       <button class="route-mode active" id="modeDrive" data-mode="driving-traffic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13.5 5.6 8.6A2 2 0 0 1 7.5 7.2h9a2 2 0 0 1 1.9 1.4L20 13.5"/><rect x="3" y="13.5" width="18" height="5" rx="1.5"/><circle cx="7.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/><circle cx="16.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/></svg>נסיעה</button>
@@ -454,6 +465,7 @@ body.radar-on{--stack-h:46px}
         <div class="nav-tools"><button class="nav-dismiss" id="btnShare2" aria-label="שיתוף יעד" title="שיתוף בוואטסאפ"><svg class="ico" style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></button>
         <button class="nav-dismiss" id="navDismiss" aria-label="סגור"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       </div>
+      <div class="alt-row" id="altRow"><span id="altStatus">לחץ «בדוק» למסלולים מעודכנים</span><button id="altCheck">בדוק</button></div>
       <div class="seg" id="altSeg" style="display:none;margin-top:8px;font-size:12.5px"></div>
       <button class="btn-nav" id="btnNav"><span class="ico" style="display:inline-block;vertical-align:-5px;margin-inline-end:6px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 19.5 21 12 17l-7.5 4z"/></svg></span><span id="btnNavT">התחל ניווט</span></button>
     </div>
@@ -581,9 +593,32 @@ function laneHint(lanes){const n=lanes.length,on=lanes.map((l,i)=>l.on?i:-1).fil
   const lo=on[0],hi=on[n?on.length-1:0],W={2:'לשני',3:'לשלושת',4:'לארבעת'}[on.length]||('ל־'+on.length);
   if(on.length===1)return hi===n-1?'היצמד לנתיב הימני':lo===0?'היצמד לנתיב השמאלי':'היצמד לנתיב האמצעי';
   if(hi===n-1)return 'היצמד '+W+' הנתיבים הימניים';if(lo===0)return 'היצמד '+W+' הנתיבים השמאליים';return 'היצמד לנתיבים האמצעיים'}
+const ROAD_PREFIX=/^(כביש|שדרות|שד[׳']|דרך|רחוב|מחלף|צומת|כיכר|סמטת|שביל|מעלה|מורד)/;
+function nameHe(n){return !n?'':(ROAD_PREFIX.test(n)?n:'רחוב '+n)}
+function kmHe(d,voice){if(d<950){const m=Math.max(50,Math.round(d/50)*50);return m+(voice?' מטרים':' מ׳')}const k=d/1000,t=k<10?String(Math.round(k*10)/10):String(Math.round(k));if(voice)return t==='1'?'קילומטר אחד':t+' קילומטרים';return t+' ק״מ'}
+/* ניסוח ההוראה לפנייה הבאה (רועי: «יש להמשיך 40 ק״מ בכביש זה עד מחלף X… היצמד לנתיב הימני לעלייה למחלף»):
+   far — לשם מה ממשיכים («מחלף קישון», «היציאה לכביש 75»); near — מה לעשות בהתקרבות, עם הנתיב; now — ההוראה ברגע הפנייה */
+function phrase(nx,lanes){const mod=nx.mod||'straight',T=nx.type,R=/right/.test(mod),L=/left/.test(mod),dir=R?'ימינה':L?'שמאלה':'',ref=nx.ref,nm=nx.name,J=nx.junc||'';
+  let dest=nx.dests?nx.dests.replace(/^[^:]*:\s*/,'').split(/[,;]/)[0].trim():'';if(dest&&(dest===J||(J&&J.includes(dest))))dest='';
+  const hint=lanes&&lanes.length?laneHint(lanes):'',lean=hint||(dir?'היצמד '+dir:'');let near,now,goal,far;
+  if(T==='arrive'){far='היעד';now='היעד '+(R?'מימין':L?'משמאל':'לפניך');near=now}
+  else if(/roundabout|rotary/.test(T)&&!/^exit/.test(T)){const n=nx.exitN||0;far='מעגל התנועה';now='במעגל התנועה צא ביציאה ה'+(['ראשונה','שנייה','שלישית','רביעית','חמישית','שישית'][n-1]||n)+(nm?' אל '+nameHe(nm):'');near=(lean?lean+' ':'')+'לקראת מעגל התנועה'}
+  else if(/^exit/.test(T)){now='צא ממעגל התנועה'+(nm?' אל '+nameHe(nm):'');near=now;far='היציאה ממעגל התנועה'}
+  else if(T==='off ramp'||T==='fork'||T==='on ramp'||T==='merge'){
+    const where=J||(ref?'כביש '+ref:'')||(nm?nameHe(nm):'');
+    if(T==='on ramp'||T==='merge'){goal=where?'לעלייה ל'+where:'לעלייה '+dir;now=(T==='merge'?'השתלב ':'עלה ')+(where?'ל'+where:dir)+(dest?' לכיוון '+dest:'');far=where?'העלייה ל'+where:'העלייה לכביש'}
+    else if(!J&&!ref&&nm){goal='ל'+nameHe(nm);now='היצמד '+(dir||'ימינה')+' ל'+nameHe(nm)+(dest?' לכיוון '+dest:'');far=nameHe(nm)}
+    else{goal=J?(J.startsWith('צומת')?'ל'+J:'ליציאה ב'+J):where?'למעבר ל'+where:dest?'ליציאה לכיוון '+dest:'ליציאה '+dir;
+      now=J?(J.startsWith('צומת')?'פנה '+dir+' ב'+J:'צא ב'+J)+(dest?' לכיוון '+dest:''):where?'עבור '+dir+' ל'+where+(dest?' לכיוון '+dest:''):'צא ביציאה '+dir+(dest?' לכיוון '+dest:'');
+      far=J||(where?'היציאה ל'+where:dest?'היציאה לכיוון '+dest:'היציאה')}
+    near=(lean||'היצמד '+(dir||'ימינה'))+' '+goal}
+  else if(mod==='straight'){now='המשך ישר'+(nm?' ב'+nameHe(nm):'');near=now;far=nm?nameHe(nm):'ההמשך ישר'}
+  else{const to=nm?' ל'+nameHe(nm):(ref?' לכביש '+ref:'');const verb=mod==='uturn'?'פנה פרסה':/sharp/.test(mod)?'פנה חד '+dir:/slight/.test(mod)?'היצמד '+dir:'פנה '+dir;
+    const to2=to||(J?' ל'+J:'');now=verb+to2+(J&&to&&J.startsWith('צומת')?' ב'+J:'');goal='לפנייה '+dir+to2;near=hint?hint+' '+goal:now;far=J||'הפנייה '+dir+to2}
+  return{near,now,far,dest}}
 // צעד אחיד לכל מנועי הניווט: מיקום הפנייה, אורך הקטע שאחריה, שם הכביש, טקסט, שלטים (banners) והכרזות קוליות לפי מרחק
 function normSteps(raw,kind){return raw.map((s,i)=>{const m=s.maneuver||{},type=m.type||'turn',mod=m.modifier||'straight';
-  const ref=s.ref?String(s.ref).split(';')[0].trim():'',name=s.name||'';const road=ref?'כביש '+ref+(name&&name!==ref?' · '+name:''):name;
+  const ref=s.ref?String(s.ref).split(';')[0].trim():'',name=s.name||'';const road=ref?'כביש '+ref+(name&&name!==ref&&!/^כביש/.test(name)?' · '+name:''):name,roadV=ref?'כביש '+ref:name;
   const instr=roadify(m.instruction||osrmStep(s).text);
   const banners=(s.bannerInstructions||[]).map(b=>{const sub=(b.sub&&b.sub.components)||[];const lanes=sub.filter(c=>c.type==='lane').map(c=>({dirs:c.directions||[],on:!!c.active,act:c.active_direction}));
     return{d:b.distanceAlongGeometry,text:roadify(b.primary&&b.primary.text),sec:roadify(b.secondary&&b.secondary.text),lanes}}).sort((a,b)=>b.d-a.d);
@@ -591,7 +626,8 @@ function normSteps(raw,kind){return raw.map((s,i)=>{const m=s.maneuver||{},type=
   if(!voices.length){const nx=raw[i+1];if(nx){const t=roadify((nx.maneuver&&nx.maneuver.instruction)||osrmStep(nx).text);if(s.distance>700)voices.push({d:500,text:'בעוד 500 מטרים, '+t});voices.push({d:Math.min(120,s.distance*0.6),text:t})}}
   const lb=banners.find(b=>b.lanes.length&&b.d<=3000),hint=lb?laneHint(lb.lanes):'';
   if(hint){const v=voices.find(v=>v.d>=600&&v.d<=1300);if(v)v.text=v.text.replace(/^(בעוד [^,]+,)\s*/,'$1 '+hint+', ').replace(/, היצמד לצד (?:ימינה|שמאלה) כדי לצאת/,' וצא').replace(/, היצמד לצד (?:ימינה|שמאלה) כדי להישאר/,' והישאר').replace(/, צא ביציאה/,' וצא ביציאה').replace(/, פנה /,' ופנה ');else if(s.distance>1400)voices.push({d:1000,text:'בעוד קילומטר, '+hint});voices.sort((a,b)=>b.d-a.d)}
-  return{loc:m.location,dist:s.distance||0,dur:s.duration||0,type,mod,road,ref,name,instr,dests:s.destinations||'',banners,voices}})}
+  const bj=banners.map(b=>b.text).find(t=>/^(מחלף|צומת) /.test(t||''))||'';
+  return{loc:m.location,dist:s.distance||0,dur:s.duration||0,type,mod,road,roadV,ref,name,instr,dests:s.destinations||'',exitN:m.exit||0,junc:'',_bj:bj,banners,voices}}).map((st,i,arr)=>{if(i>0&&!st.junc&&arr[i-1]._bj)st.junc=arr[i-1]._bj;return st})}
 function normValhalla(mans,coords){return normSteps(mans.map(m=>{const k=VAL_MAP[m.type]||'straight',st=valhallaStep(m,coords);let type='turn',mod=k;
   if(k==='depart'||k==='arrive'){type=k;mod='straight'}else if(k.startsWith('ramp')){type='on ramp';mod=k.includes('left')?'slight left':'slight right'}else if(k.startsWith('exit')){type='off ramp';mod=k.includes('left')?'slight left':'slight right'}
   else if(k.startsWith('merge')){type='merge';mod=k.includes('left')?'slight left':'slight right'}else if(k==='roundabout'||k==='exit roundabout'){type=k;mod='straight'}
@@ -997,7 +1033,7 @@ const App={
     try{
       let route=null;
       if(USE_MAPBOX){
-        const extra=walking?'':'&alternatives=true&annotations=congestion,duration,distance&banner_instructions=true&voice_instructions=true&voice_units=metric';
+        const extra=walking?'':'&alternatives=true&annotations=congestion,duration,distance,maxspeed&banner_instructions=true&voice_instructions=true&voice_units=metric';
         const r=await(await timedFetch(`https://api.mapbox.com/directions/v5/mapbox/${this.routeMode}/${from.lng},${from.lat};${dest.lng},${dest.lat}?geometries=geojson&overview=full&steps=true&language=he${extra}&access_token=${MAPBOX_TOKEN}`,8000,ac)).json();
         if(stale())return;
         if(!r.routes||!r.routes.length){this.toast('לא נמצא מסלול');return}
@@ -1034,6 +1070,7 @@ const App={
       this._routeFrom=from;this._applyRoute(route,walking,{quiet:this._liveQuiet});
       this._routeGeo=route.geometry;
       if(this._liveMsg){const m=this._liveMsg;this._liveMsg=null;this.toast(m);this._say(m,true)}
+      if(opts.reason==='manual'){const sv=this._manualSave||0;this._altStatus(sv>=60?'יש מסלול מהיר יותר — חוסך '+Math.round(sv/60)+' דק׳. בחר למטה':(this._routes||[]).length>1?'המסלול הנוכחי הוא המהיר. יש חלופה למטה':'המסלול הנוכחי הוא המהיר')}
       // Fit bounds — הריפוד לפי הגובה האמיתי של הלוח התחתון ושדה החיפוש
       const coords=route.geometry.coordinates;
       if(this.map&&coords.length&&!this._nav){
@@ -1072,6 +1109,7 @@ const App={
       if(best!==same&&save>=180&&!big&&now-(this._hintT||0)>600000){this._hintT=now;this.toast('יש מסלול מהיר יותר ב־'+Math.round(save/60)+' דק׳ — ראה באפשרויות')}
       this._liveQuiet=true;return same;
     }
+    if(reason==='manual'){this._liveQuiet=true;this._liveMsg=null;this._manualSave=same?same.duration-best.duration:0;return same||best}
     if(reason==='refresh'||reason==='offroute'){this._liveMsg=same?null:'המסלול חושב מחדש';this._liveQuiet=!!same;return same||best}
     return best;
   },
@@ -1095,7 +1133,7 @@ const App={
     this._routeGeo=route.geometry;this._steps=route._steps||[];this._stepIdx=-1;this._spk={};this._lanesKey=null;this._jamSaid=false;
     if(this._nav){this._skipDepart=true;this._quiet=!!o.quiet}
     this._prepRoute(route);
-    this._routeFC=this._segFC(route);if(!walking)this._loadCameras(route);else this._cams=[];
+    this._routeFC=this._segFC(route);if(!walking){this._loadCameras(route);if(!route._juncLoaded){route._juncLoaded=true;this._loadJunctions(route)}}else this._cams=[];
     this._altFC={type:'FeatureCollection',features:rs.filter(r=>r!==route).map(r=>({type:'Feature',properties:{},geometry:r.geometry}))};
     if(this.map&&this.map.getSource('route')){this.map.getSource('route').setData(this._routeFC);this.map.getSource('route-alt').setData(this._altFC)}
     // בורר המהיר/הקצר — רק כשיש באמת שני מסלולים שונים
@@ -1104,7 +1142,7 @@ const App={
     if(!walking&&rs.length>1){
       seg.style.display='flex';
       const opts=[];opts.push({r:fast,l:'המהיר'});if(short!==fast)opts.push({r:short,l:'הקצר'});for(const r of rs){if(opts.length>=3)break;if(!opts.some(o=>o.r===r))opts.push({r,l:'חלופה'})}
-      for(const o of opts){const b=document.createElement('button');b.textContent=`${o.l} ${this._fmtT(o.r.duration)} · ${this._fmtD(o.r.distance)}`;b.classList.toggle('on',o.r===route);b.onclick=()=>{this._routePref=o.r===fast?'fast':o.r===short?'short':'alt';this._applyRoute(o.r,walking);this.updateNavInfo()};seg.appendChild(b)}
+      for(const o of opts){const b=document.createElement('button');const dm=Math.round((route.duration-o.r.duration)/60);b.textContent=`${o.l} ${this._fmtT(o.r.duration)} · ${this._fmtD(o.r.distance)}`+(o.r!==route&&this._nav?(dm>0?` · חוסך ${dm} דק׳`:dm<0?` · +${-dm} דק׳`:''):'');b.classList.toggle('on',o.r===route);b.onclick=()=>{this._routePref=o.r===fast?'fast':o.r===short?'short':'alt';this._applyRoute(o.r,walking);this.updateNavInfo()};seg.appendChild(b)}
     }else seg.style.display='none';
     // מספרים
     const coords=route.geometry.coordinates;
@@ -1123,7 +1161,7 @@ const App={
     const c=route.geometry.coordinates,cum=[0];for(let i=1;i<c.length;i++)cum[i]=cum[i-1]+this.dist(c[i-1][1],c[i-1][0],c[i][1],c[i][0]);
     let k=0;const starts=(route._steps||[]).map(s=>{if(!s.loc)return k;let best=1e9,bi=k;for(let i=k;i<c.length;i++){const d=this.dist(s.loc[1],s.loc[0],c[i][1],c[i][0]);if(d<best){best=d;bi=i}if(d<1)break}k=bi;return bi});
     this._cum=cum;this._starts=starts;this._me=0;this._along=0;this._off=null;this._offCnt=0;
-    const a={dur:[],dist:[],cong:[]};for(const l of (route.legs||[])){const n=l.annotation||{};a.dur.push(...(n.duration||[]));a.dist.push(...(n.distance||[]));a.cong.push(...(n.congestion||[]))}
+    const a={dur:[],dist:[],cong:[],max:[]};for(const l of (route.legs||[])){const n=l.annotation||{};a.dur.push(...(n.duration||[]));a.dist.push(...(n.distance||[]));a.cong.push(...(n.congestion||[]));a.max.push(...(n.maxspeed||[]))}
     this._ann=(a.dur.length===c.length-1&&a.dist.length===c.length-1)?a:null;this._cong=a.cong;
   },
   /* המיקום על הקו: הקודקוד הקרוב (חיפוש בחלון סביב הקודם) והטלה על הקטע — כדי שהמרחק לפנייה יהיה רציף */
@@ -1193,10 +1231,19 @@ const App={
   },
   /* כל תיקון מיקום בניווט: כרטיס הפנייה, התראות, שורת הזמן, ירידה מהמסלול */
   _navTick(){
-    if(!this._nav)return;this._updateTurn();if(!this._nav)return;this._checkAlerts();this._updateNavBar();
+    if(!this._nav)return;this._updateTurn();if(!this._nav)return;this._checkAlerts();this._updateNavBar();this._updateSpeed();
     if(this._off!=null&&this.pos){if(this._off>60&&this.pos.acc<80)this._offCnt=(this._offCnt||0)+1;else this._offCnt=0;
       if(this._offCnt>=2&&Date.now()-(this._reT||0)>15000){this._reT=Date.now();this._offCnt=0;this.fetchRoute({reason:'offroute'})}}
   },
+  /* כפתור «מסלולים» בנסיעה (כמו בוויז): בדיקה מיידית של מסלולים מעודכנים, בלי להחליף לבד — הנהג בוחר */
+  checkRoutes(){if(!this._nav||!this.pos||!this.dest)return;if(this._checking)return;this._checking=true;this._altStatus('בודק מסלולים מעודכנים…');Promise.resolve(this.fetchRoute({reason:'manual'})).finally(()=>{this._checking=false;if(document.getElementById('altStatus').textContent.startsWith('בודק'))this._altStatus('לא התקבלה תשובה — נסה שוב')})},
+  _altStatus(t){const e=document.getElementById('altStatus');if(e)e.textContent=t},
+  /* מהירות בפועל (GPS) מול המותרת (נתוני הכביש של מפבוקס/OSM לקטע שבו אנחנו). מעל המותר — אדום, ותזכורת קולית לכל היותר פעם ב־90 שנ׳ */
+  _updateSpeed(){const w=document.getElementById('speed');if(!w||!this.pos)return;const v=this.pos.spd>0?Math.round(this.pos.spd*3.6):0;
+    const m=this._ann&&this._ann.max&&this._ann.max[this._me];let lim=0;if(m&&!m.unknown&&m.speed>0){lim=m.unit==='mph'?Math.round(m.speed*1.609):m.speed}
+    document.getElementById('spdNow').textContent=v;const L=document.getElementById('spdLim');L.textContent=lim||'';L.style.display=lim?'':'none';
+    const over=lim>0&&v>lim;w.classList.toggle('over',over);w.classList.add('on');
+    if(over&&Date.now()-(this._spdSaidT||0)>90000){this._spdSaidT=Date.now();this._say('שים לב, אתה מעל המהירות המותרת')}},
   _navRefresh(){if(!this._nav||!USE_MAPBOX||this.routeMode==='walking'||!navigator.onLine||!this.pos||Date.now()-this.pos.t>20000)return;this.fetchRoute({reason:'refresh'})},
   _updateTurn(){
     const st=this._steps||[];if(!this.pos||st.length<2||!this._cum||!this._starts)return;const q=this._locate();if(!q)return;this._spk=this._spk||{};
@@ -1205,11 +1252,12 @@ const App={
     if(i!==this._stepIdx){this._stepIdx=i;this._enterStep(i,q)}
     const cur=st[i],nx=st[i+1],dNext=Math.max(0,this._cum[this._starts[i+1]]-q.along);this._dNext=dNext;
     // רחוק מהפנייה: «המשך בכביש 6 · עוד 93 ק״מ עד …»; קרוב: הפנייה עצמה + לאן + נתיבים
-    const far=dNext>1500&&!!cur.road;
+    const far=dNext>1500;
     const ban=cur.banners.length?(cur.banners.filter(b=>b.d>=dNext).sort((a,b)=>a.d-b.d)[0]||cur.banners[0]):null;
-    const parts=(nx.instr||'').split(' לכיוון ');let text,sub;
-    if(far){text='המשך ב'+cur.road;sub='עוד '+(dNext>=10000?Math.round(dNext/1000)+' ק״מ':this._fmtD(dNext))+' עד: '+parts[0]}
-    else{text=parts[0]||nx.road;sub=parts[1]?'לכיוון '+parts[1]:(ban&&ban.sec?'לכיוון '+ban.sec:(nx.road&&!text.includes(nx.road)?nx.road:''))}
+    const lanesAll=(cur.banners.find(b=>b.lanes.length)||{}).lanes||[];const ph=phrase(nx,lanesAll);let text,sub;
+    if(far){text='המשך '+kmHe(dNext)+(cur.road?' ב'+cur.road:'');sub=ph.far?'עד '+ph.far:''}
+    else{text=dNext<=250?ph.now:ph.near;sub=[ph.dest&&!text.includes(ph.dest)?'לכיוון '+ph.dest:'',nx.ref&&!text.includes('כביש '+nx.ref)?'כביש '+nx.ref:''].filter(Boolean).join(' · ')}
+    if(cur._vk!==(cur.junc||'')+'|'+(nx.junc||'')){cur._vk=(cur.junc||'')+'|'+(nx.junc||'');cur.voices=this._voicesFor(i)}
     const iconKey=far?'straight':nx.type+'|'+nx.mod;if(this._iconKey!==iconKey){this._iconKey=iconKey;document.getElementById('turnIcon').innerHTML=far?manIcon('turn','straight'):manIcon(nx.type,nx.mod)}
     document.getElementById('turnDist').textContent=dNext<1000?Math.max(0,Math.round(dNext/10)*10)+' מ׳':(dNext/1000).toFixed(dNext<10000?1:0)+' ק״מ';
     document.getElementById('turnText').textContent=text;const se=document.getElementById('turnSub');se.textContent=sub;se.style.display=sub?'':'none';
@@ -1223,6 +1271,19 @@ const App={
     if(i===st.length-2&&dNext<25){this._say('הגעת ליעד',true);this.toast('🏁 הגעת ליעד');this.stopNav(true);return}
     this._navCam(dNext);
   },
+  /* ההכרזות של הצעד: בתחילתו «המשך 40 קילומטרים בכביש 6 עד מחלף קישון», 3 ק״מ, קילומטר (עם הנתיב), 400 מ׳, וברגע הפנייה */
+  _voicesFor(i){const st=this._steps,cur=st[i],nx=st[i+1];if(!nx)return[];const ph=phrase(nx,(cur.banners.find(b=>b.lanes.length)||{}).lanes||[]),d=cur.dist,v=[];
+    if(d>2500)v.push({d:d-30,text:'המשך '+kmHe(d,true)+(cur.roadV?' ב'+cur.roadV:'')+(ph.far?' עד '+ph.far:'')});
+    if(d>3500)v.push({d:3000,text:'בעוד 3 קילומטרים, '+ph.near});
+    if(d>1300)v.push({d:1000,text:'בעוד קילומטר, '+ph.near});
+    if(d>550)v.push({d:400,text:'בעוד 400 מטרים, '+ph.now});else if(d>250)v.push({d:Math.round(d*0.7),text:'בעוד '+kmHe(d*0.7,true)+', '+ph.now});
+    let last=ph.now;const nn=st[i+2];if(nn&&nx.dist<250&&nx.type!=='arrive'){last+='. ואז '+phrase(nn,[]).now}
+    v.push({d:Math.min(120,d*0.5),text:last});return v},
+  /* שמות מחלפים וצמתים ליד נקודות הפנייה — מ־OpenStreetMap (motorway_junction / junction=yes) */
+  async _loadJunctions(route){const st=route._steps||[];const pts=st.filter(s=>/off ramp|fork|on ramp|merge|turn|end of road/.test(s.type)&&s.loc&&(!s.name||s.ref));if(!pts.length)return;
+    const q='[out:json][timeout:15];('+pts.map(s=>`node["highway"="motorway_junction"](around:150,${s.loc[1]},${s.loc[0]});node["junction"="yes"]["name"](around:90,${s.loc[1]},${s.loc[0]});`).join('')+');out body;';
+    try{const j=await overpass(q,16000);let n=0;for(const el of (j.elements||[])){const t=el.tags||{},name=t.name||(t.ref?'יציאה '+t.ref:'');if(!name)continue;let best=1e9,bs=null;for(const s of pts){const d=this.dist(el.lat,el.lon,s.loc[1],s.loc[0]);if(d<best){best=d;bs=s}}if(bs&&best<160&&(!bs.junc||!/^(מחלף|צומת)/.test(bs.junc))){bs.junc=name;n++}}
+      if(n&&this._nav&&this._steps===st)this._navTick()}catch(e){}},
   _enterStep(i,q){
     const cur=this._steps[i],dNext=this._cum[this._starts[i+1]]-q.along;
     if(i===0&&this._skipDepart){cur.voices.forEach((v,k)=>this._spk['0:'+k]=1);this._skipDepart=false;return}
@@ -1299,7 +1360,7 @@ const App={
   },
   stopNav(arrived){
     this._nav=false;clearInterval(this._refreshT);this._setCar(false);
-    document.getElementById('turnLanes').classList.remove('on');document.getElementById('turnJam').classList.remove('on');
+    document.getElementById('turnLanes').classList.remove('on');document.getElementById('turnJam').classList.remove('on');document.getElementById('speed').classList.remove('on','over');
     document.getElementById('turn').classList.remove('active');document.getElementById('alert').classList.remove('active');document.getElementById('sheet').classList.remove('navopts');document.getElementById('searchArea').classList.remove('navhide');document.body.classList.remove('navon');
     document.getElementById('btnNavT').textContent='התחל ניווט';
     try{if(this._wake){this._wake.release();this._wake=null}}catch(e){}
@@ -1556,7 +1617,8 @@ const App={
     si.onsearch=()=>this.search(si.value);
     document.getElementById('searchGo').onclick=()=>this.search(si.value);
     document.getElementById('micBtn').onclick=()=>this.voiceSearch();
-    document.getElementById('nbOpts').onclick=()=>document.getElementById('sheet').classList.toggle('navopts');
+    document.getElementById('nbOpts').onclick=()=>{const sh=document.getElementById('sheet');const open=!sh.classList.contains('navopts');sh.classList.toggle('navopts',open);if(open&&this._nav)this.checkRoutes()};
+    document.getElementById('altCheck').onclick=()=>this.checkRoutes();
     document.addEventListener('click',e=>{if(!e.target.closest('.search-area'))document.getElementById('resultsList').classList.remove('open')});
   }
 };
