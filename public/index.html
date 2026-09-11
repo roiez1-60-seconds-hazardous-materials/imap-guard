@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f2f2f7">
 <title>iMap Guard - ניווט חירום</title>
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Secular+One&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -155,10 +155,10 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .toast{position:fixed;top:68px;left:50%;z-index:1100;transform:translateX(-50%) translateY(-100px);background:var(--card-solid);border-radius:var(--radius-md);padding:11px 22px;font-size:14px;font-weight:600;color:var(--text);box-shadow:var(--shadow-lg);border:0.5px solid var(--sep);transition:transform .45s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:92%}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-/* Mapbox overrides */
-.mapboxgl-ctrl-attrib{font-size:9px!important;background:rgba(242,242,247,0.75)!important;backdrop-filter:blur(8px)!important;border-radius:6px 0 0 0!important}
-.mapboxgl-ctrl-logo{opacity:.6!important}
-.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-bottom-right{bottom:180px!important}
+/* MapLibre overrides */
+.maplibregl-ctrl-attrib{font-size:9px!important;background:rgba(242,242,247,0.75)!important;backdrop-filter:blur(8px)!important;border-radius:6px 0 0 0!important}
+.maplibregl-ctrl-logo{opacity:.6!important}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{bottom:180px!important}
 </style>
 </head>
 <body>
@@ -166,7 +166,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 <div class="splash" id="splash">
   <div class="splash-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="3,11 22,2 13,21 11,13"/></svg></div>
   <div class="splash-title">iMap Guard</div>
-  <div class="splash-sub">ניווט חירום · Mapbox · Dead Reckoning</div>
+  <div class="splash-sub">ניווט חירום · OpenStreetMap · Dead Reckoning</div>
   <div class="splash-spinner"></div>
   <div class="splash-status" id="splashStatus">טוען מפה...</div>
 </div>
@@ -256,8 +256,17 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 <div class="credit-bar"><div class="credit-tag">כלי ניסיוני<span class="dot"></span>פותח ע״י רועי צוקרמן</div></div>
 
 <script>
-const MAPBOX_TOKEN='pk.eyJ1Ijoicm9pZXoiLCJhIjoiY2t2YjVqeGZpMDNxZDJ4bXB1dWp1MTNocyJ9.3vPeZHCVkHEkxrCz6Eb4OA';
-mapboxgl.accessToken=MAPBOX_TOKEN;
+/* מפה, חיפוש וניווט — שירותים פתוחים בלבד, בלי מפתח ובלי תשלום:
+   אריחים: OpenFreeMap (OpenMapTiles על נתוני OpenStreetMap) · חיפוש: Nominatim · מסלול: OSRM (נסיעה), Valhalla (הליכה) */
+const mapboxgl=maplibregl;
+/* עברית בתוויות המפה: בלי התוסף הזה האותיות מצוירות הפוך */
+try{maplibregl.setRTLTextPlugin('rtl-text.js',true);}catch(e){}
+const MAP_STYLE='https://tiles.openfreemap.org/styles/liberty';
+const NOMINATIM='https://nominatim.openstreetmap.org';
+const OSRM='https://router.project-osrm.org/route/v1/driving/';
+const VALHALLA='https://valhalla1.openstreetmap.de/route';
+/* Valhalla מחזיר את הקו כמחרוזת דחוסה (polyline, דיוק 6) */
+function decodePoly6(s){let i=0,lat=0,lng=0,out=[];while(i<s.length){let b,sh=0,r=0;do{b=s.charCodeAt(i++)-63;r|=(b&31)<<sh;sh+=5}while(b>=32);lat+=(r&1)?~(r>>1):(r>>1);sh=0;r=0;do{b=s.charCodeAt(i++)-63;r|=(b&31)<<sh;sh+=5}while(b>=32);lng+=(r&1)?~(r>>1):(r>>1);out.push([lng/1e6,lat/1e6])}return out}
 
 /* ═══ DR Engine ═══ */
 const DR={
@@ -306,9 +315,9 @@ const App={
   },
 
   buildMap(){
-    this.map=new mapboxgl.Map({
+    this.map=new maplibregl.Map({
       container:'map',
-      style:'mapbox://styles/mapbox/streets-v12',
+      style:MAP_STYLE,
       center:[35.21,31.77],
       zoom:8,
       pitch:0,
@@ -319,31 +328,11 @@ const App={
 
     this.map.on('load',()=>{
       this.ready=true;
-      // 3D buildings
-      const layers=this.map.getStyle().layers;
-      let labelLayerId;
-      for(const l of layers){if(l.type==='symbol'&&l.layout['text-field']){labelLayerId=l.id;break}}
-      this.map.addLayer({id:'3d-buildings',source:'composite','source-layer':'building',filter:['==','extrude','true'],type:'fill-extrusion',minzoom:14,paint:{'fill-extrusion-color':'#ddd','fill-extrusion-height':['get','height'],'fill-extrusion-base':['get','min_height'],'fill-extrusion-opacity':.5}},labelLayerId);
-
-      // ═══ Live Traffic Layer ═══
-      this.map.addSource('mapbox-traffic',{type:'vector',url:'mapbox://mapbox.mapbox-traffic-v1'});
-      this.map.addLayer({
-        id:'traffic-line',type:'line',source:'mapbox-traffic','source-layer':'traffic',
-        minzoom:6,
-        layout:{'line-join':'round','line-cap':'round'},
-        paint:{
-          'line-width':['interpolate',['linear'],['zoom'],6,0.5,9,1.5,14,3,18,6],
-          'line-color':['match',['get','congestion'],
-            'low','#34c759',
-            'moderate','#ff9500',
-            'heavy','#ff3b30',
-            'severe','#af0000',
-            'rgba(0,0,0,0)'],
-          'line-opacity':0.7,
-          'line-offset':['interpolate',['linear'],['zoom'],6,0,9,0.5,14,2,18,4]
-        }
-      },labelLayerId);
-      this._trafficVisible=true;
+      /* תוויות בעברית בלבד (במקום לטינית + עברית) */
+      try{for(const l of this.map.getStyle().layers){if(l.type==='symbol'&&l.layout&&l.layout['text-field'])this.map.setLayoutProperty(l.id,'text-field',['coalesce',['get','name:he'],['get','name'],['get','name:latin']]);}}catch(e){console.warn('labels',e)}
+      // תנועה חיה אין במפה החינמית — הכפתור מוסתר
+      this._trafficVisible=false;
+      const tb=document.getElementById('trafficBtn');if(tb)tb.style.display='none';
 
       // Route source
       this.map.addSource('route',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[]}}});
@@ -385,7 +374,7 @@ const App={
         border:3px solid white;
         box-shadow:0 1px 8px rgba(66,133,244,.5),0 0 0 1px rgba(66,133,244,.08);z-index:3;transition:all .5s"></div>
     </div><style>@keyframes uRing{0%{transform:scale(.6);opacity:.7}100%{transform:scale(2.5);opacity:0}}</style>`;
-    this.marker=new mapboxgl.Marker({element:el,anchor:'center'}).setLngLat([0,0]);
+    this.marker=new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([0,0]);
   },
 
   sensors(){
@@ -516,32 +505,33 @@ const App={
   setSource(txt,cls){document.getElementById('pillLabel').textContent=txt;document.getElementById('sourcePill').className='source-pill '+cls},
   heb(h){const d=['צפון','צפון-מזרח','מזרח','דרום-מזרח','דרום','דרום-מערב','מערב','צפון-מערב'];return d[Math.round(h/45)%8]},
 
-  /* ═══ Search (Mapbox Geocoding) ═══ */
+  /* ═══ חיפוש כתובת (Nominatim / OpenStreetMap) ═══ */
   async search(q){
     if(!q||q.length<2){document.getElementById('resultsList').classList.remove('open');return}
     try{
-      const r=await(await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=il&language=he&limit=5`)).json();
+      const r=await(await fetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=jsonv2&countrycodes=il&accept-language=he&limit=5`)).json();
       const c=document.getElementById('resultsList');c.innerHTML='';
-      if(!r.features||!r.features.length){c.innerHTML='<div class="result-row"><div class="result-text"><div class="result-name">לא נמצאו תוצאות</div></div></div>';c.classList.add('open');return}
-      r.features.forEach(f=>{
-        const nm=f.text||f.place_name.split(',')[0];
-        const ad=f.place_name.split(',').slice(1,3).join(', ');
+      if(!Array.isArray(r)||!r.length){c.innerHTML='<div class="result-row"><div class="result-text"><div class="result-name">לא נמצאו תוצאות</div></div></div>';c.classList.add('open');return}
+      r.forEach(f=>{
+        const parts=(f.display_name||'').split(',').map(s=>s.trim());
+        const nm=f.name||parts[0];
+        const ad=parts.slice(1,3).join(', ');
         const d=document.createElement('div');d.className='result-row';
         d.innerHTML=`<div class="result-icon">📍</div><div class="result-text"><div class="result-name">${nm}</div><div class="result-addr">${ad}</div></div>`;
-        d.onclick=()=>{this.setDest(f.center[1],f.center[0],nm);c.classList.remove('open');document.getElementById('searchInput').value=nm};
+        d.onclick=()=>{this.setDest(+f.lat,+f.lon,nm);c.classList.remove('open');document.getElementById('searchInput').value=nm};
         c.appendChild(d);
       });c.classList.add('open');
     }catch(e){this.toast('⚠️ שגיאה בחיפוש')}
   },
 
-  /* ═══ Routing (Mapbox Directions) ═══ */
+  /* ═══ מסלול (OSRM לנסיעה · Valhalla להליכה) ═══ */
   async setDest(lat,lng,name){
     this.dest={lat,lng,name};
     // Dest marker
     if(this._destMarker)this._destMarker.remove();
     const el=document.createElement('div');
     el.innerHTML=`<div style="background:#007aff;color:white;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.2);border:2px solid white">${name}</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #007aff;margin:0 auto"></div>`;
-    this._destMarker=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([lng,lat]).addTo(this.map);
+    this._destMarker=new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([lng,lat]).addTo(this.map);
 
     document.getElementById('navPanel').classList.add('active');
     document.getElementById('navLabel').textContent='ניווט ל: '+name;
@@ -550,19 +540,34 @@ const App={
 
   async fetchRoute(){
     if(!this.pos||!this.dest)return;
-    const mode=this.routeMode;
-    const url=`https://api.mapbox.com/directions/v5/mapbox/${mode}/${this.pos.lng},${this.pos.lat};${this.dest.lng},${this.dest.lat}?geometries=geojson&overview=full&steps=true&language=he&access_token=${MAPBOX_TOKEN}`;
+    const walking=this.routeMode==='walking';
     try{
-      const r=await(await fetch(url)).json();
-      if(!r.routes||!r.routes.length){this.toast('לא נמצא מסלול');return}
-      const route=r.routes[0];
+      let route=null;
+      if(walking){
+        /* Valhalla: מסלול הולכי רגל אמיתי (שבילים, מדרכות) */
+        try{
+          const q={locations:[{lat:this.pos.lat,lon:this.pos.lng},{lat:this.dest.lat,lon:this.dest.lng}],costing:'pedestrian',units:'kilometers'};
+          const v=await(await fetch(VALHALLA+'?json='+encodeURIComponent(JSON.stringify(q)))).json();
+          if(v.trip&&v.trip.legs&&v.trip.legs.length){
+            const coords=v.trip.legs.flatMap(l=>decodePoly6(l.shape));
+            route={distance:v.trip.summary.length*1000,duration:v.trip.summary.time,geometry:{type:'LineString',coordinates:coords}};
+          }
+        }catch(e){console.warn('Valhalla',e)}
+      }
+      if(!route){
+        /* OSRM: מסלול נסיעה. בהליכה — אותו קו, והזמן לפי 5 קמ״ש */
+        const r=await(await fetch(`${OSRM}${this.pos.lng},${this.pos.lat};${this.dest.lng},${this.dest.lat}?geometries=geojson&overview=full`)).json();
+        if(!r.routes||!r.routes.length){this.toast('לא נמצא מסלול');return}
+        route=r.routes[0];
+        if(walking)route.duration=route.distance/1.39;
+      }
       // Draw route
       if(this.map.getSource('route')){
         this.map.getSource('route').setData({type:'Feature',geometry:route.geometry});
       }
       // Fit bounds
       const coords=route.geometry.coordinates;
-      const bounds=coords.reduce((b,c)=>b.extend(c),new mapboxgl.LngLatBounds(coords[0],coords[0]));
+      const bounds=coords.reduce((b,c)=>b.extend(c),new maplibregl.LngLatBounds(coords[0],coords[0]));
       this.map.fitBounds(bounds,{padding:{top:120,bottom:280,left:60,right:60},duration:1000});
 
       // Update nav info
@@ -604,6 +609,7 @@ const App={
   recenter(){if(this.pos&&this.ready)this.map.flyTo({center:[this.pos.lng,this.pos.lat],zoom:16,pitch:45,duration:800})},
 
   toggleTraffic(){
+    if(!this.map.getLayer('traffic-line')){this.toast('תנועה חיה אינה זמינה במפה החינמית');return}
     this._trafficVisible=!this._trafficVisible;
     this.map.setLayoutProperty('traffic-line','visibility',this._trafficVisible?'visible':'none');
     const btn=document.getElementById('trafficBtn');
@@ -658,9 +664,9 @@ const App={
       if(e.originalEvent.target.closest('.sheet,.topbar,.search-area,.side-controls,.spoof-alert,.dr-banner'))return;
       const{lng,lat}=e.lngLat;
       // Reverse geocode to get address
-      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=he&limit=1`)
+      fetch(`${NOMINATIM}/reverse?lat=${lat}&lon=${lng}&format=jsonv2&accept-language=he&zoom=17`)
         .then(r=>r.json()).then(data=>{
-          const name=data.features&&data.features.length>0?data.features[0].text||data.features[0].place_name.split(',')[0]:`${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          const name=data&&(data.name||(data.display_name||'').split(',')[0].trim())||`${lat.toFixed(4)}, ${lng.toFixed(4)}`;
           this.setDest(lat,lng,name);
           document.getElementById('searchInput').value=name;
         }).catch(()=>{
