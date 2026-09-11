@@ -1221,7 +1221,7 @@ const App={
     // הצטרפות באמצע צעד (חישוב מחדש): מדלגים על ההכרזות שכבר עברנו, חוץ מהאחרונה שבהן — היא תישמע מייד
     const past=cur.voices.map((v,k)=>({v,k})).filter(x=>x.v.d>dNext+30);past.slice(0,-1).forEach(x=>this._spk[i+':'+x.k]=1);
   },
-  /* המצלמה בניווט: מבט רחוק בכביש מהיר, התקרבות הדרגתית מ־1.5 ק״מ לפני הפנייה, וחזרה אחריה. הרכב בשליש התחתון של המסך */
+  /* המצלמה בניווט: מבט רחוק בכביש מהיר, התקרבות הדרגתית מ־1.5 ק״מ לפני הפנייה, וחזרה אחריה. ריפוד עליון של חצי מסך מוריד את הרכב לרבע התחתון — רוב המסך הוא הדרך שלפנינו */
   _navCam(dNext){
     if(!this.ready||!this.pos)return;const{lat,lng,spd,hdg}=this.pos,v=spd>0?spd:0;
     this._spdS=this._spdS==null?v:this._spdS*0.7+v*0.3;const sv=this._spdS;
@@ -1231,7 +1231,7 @@ const App={
     const pitch=z>=16.3?60:z>=15.2?55:48;
     const b=Number.isFinite(hdg)&&v>1?hdg:(this.heading??this.map.getBearing());
     const h=this.map.getContainer().clientHeight;
-    this.map.easeTo({center:[lng,lat],bearing:b,pitch,zoom:z,padding:{top:0,left:0,right:0,bottom:Math.round(h*0.3)},duration:950,easing:t=>t,essential:true});
+    this.map.easeTo({center:[lng,lat],bearing:b,pitch,zoom:z,padding:{top:Math.round(h*0.5),left:0,right:0,bottom:0},duration:950,easing:t=>t,essential:true});
     if(this._carRot)this._carRot(b);
   },
   /* בניווט: רכב מלמעלה במקום הנקודה הכחולה, מסתובב עם כיוון הנסיעה ושוכב על המפה */
