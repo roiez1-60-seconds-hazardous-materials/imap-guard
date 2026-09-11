@@ -17,12 +17,27 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 /* מצב לילה: משתני צבע כהים; המפה עוברת לסגנון כהה בנפרד */
-:root[data-theme=dark]{--bg:#000;--card:rgba(28,28,30,0.9);--card-solid:#1c1c1e;--card-hover:rgba(44,44,46,0.95);--text:#f2f2f7;--text2:#d1d1d6;--text3:#8e8e93;--text4:#636366;--sep:rgba(84,84,88,0.4);--sep-heavy:rgba(84,84,88,0.7);--blue:#0a84ff;--blue-light:rgba(10,132,255,0.18);--blue-glow:rgba(10,132,255,0.35);--shadow-sm:0 1px 3px rgba(0,0,0,0.5);--shadow-md:0 4px 20px rgba(0,0,0,0.5);--shadow-lg:0 8px 40px rgba(0,0,0,0.6)}
+:root[data-theme=dark]{--green-t:#30d158;--orange-t:#ff9f0a;--red-t:#ff453a;--bg:#000;--card:rgba(28,28,30,0.9);--card-solid:#1c1c1e;--card-hover:rgba(44,44,46,0.95);--text:#f2f2f7;--text2:#d1d1d6;--text3:#8e8e93;--text4:#636366;--sep:rgba(84,84,88,0.4);--sep-heavy:rgba(84,84,88,0.7);--blue:#0a84ff;--blue-light:rgba(10,132,255,0.18);--blue-glow:rgba(10,132,255,0.35);--shadow-sm:0 1px 3px rgba(0,0,0,0.5);--shadow-md:0 4px 20px rgba(0,0,0,0.5);--shadow-lg:0 8px 40px rgba(0,0,0,0.6)}
 [data-theme=dark] .about-btn{background:rgba(44,44,46,0.8);color:#f2f2f7}
 [data-theme=dark] .metric-card,[data-theme=dark] .route-mode{background:#2c2c2e}
 [data-theme=dark] .nav-card-bg{background:linear-gradient(135deg,rgba(10,132,255,0.16),rgba(10,132,255,0.06));border-color:rgba(10,132,255,0.3)}
-[data-theme=dark] .open-in a{background:rgba(10,132,255,0.2);border-color:rgba(10,132,255,0.4)}
+[data-theme=dark] .open-in a{background:#1c2d44;border-color:#2b4a6f}
 [data-theme=dark] .help-chip{background:rgba(44,44,46,0.9)}
+[data-theme=dark] .source-pill,[data-theme=dark] .acc-chip{background:rgba(44,44,46,0.85);color:#f2f2f7;border-color:rgba(84,84,88,0.5)}
+[data-theme=dark] .pill-label{color:#f2f2f7}
+[data-theme=dark] .sheet-grip{background:rgba(255,255,255,0.25)}
+[data-theme=dark] .nav-dismiss{background:rgba(255,255,255,0.12);color:#d1d1d6}
+[data-theme=dark] .results-list,[data-theme=dark] .search-field{background:rgba(28,28,30,0.92)}
+[data-theme=dark] .result-icon{background:rgba(10,132,255,0.22)}
+[data-theme=dark] #searchInput{color:#f2f2f7}[data-theme=dark] #searchInput::placeholder{color:#8e8e93}
+[data-theme=dark] .toast,[data-theme=dark] .turn{background:#2c2c2e;color:#f2f2f7}
+[data-theme=dark] .abtn.secondary{background:#2c2c2e;color:#f2f2f7;border-color:rgba(84,84,88,0.5)}
+[data-theme=dark] .lrow{border-color:rgba(84,84,88,0.5)}
+[data-theme=dark] .sw i{background:rgba(120,120,128,0.5)}
+[data-theme=dark] .credit-line,[data-theme=dark] .lnote,[data-theme=dark] .metric-unit{color:#8e8e93}
+[data-theme=dark] .metric-label,[data-theme=dark] .metric-unit{color:#aeaeb2}
+[data-theme=dark] .spoof-alert,[data-theme=dark] .dr-banner{background:#2c2c2e}
+[data-theme=dark] .open-in a{color:#8cc4ff}
 [data-theme=dark] .ctrl-group,[data-theme=dark] .topbar,[data-theme=dark] .lsheet{background:rgba(28,28,30,0.85)}
 [data-theme=dark] .seg{background:#2c2c2e}[data-theme=dark] .seg button.on{background:#48484a;color:#fff}
 /* ─── מערכת עיצוב: זכוכית, קווים דקים, אייקוני קו — בלי אמוג׳י ─── */
@@ -33,8 +48,8 @@
 .ctrl:active{background:var(--blue-light)}
 .ctrl.on{color:var(--blue)}
 .seg{display:flex;background:rgba(118,118,128,0.12);border-radius:11px;padding:2px;gap:2px}
-.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:8px 6px;font-family:inherit;font-size:14px;font-weight:600;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;-webkit-appearance:none}
-.seg button.on{background:var(--card-solid);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.12)}
+.seg button,.seg .route-mode,.seg .route-mode.active{flex:1;border:0;box-shadow:none;background:transparent;border-radius:9px;padding:8px 6px;font-family:inherit;font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;-webkit-appearance:none}
+.seg button.on,.seg .route-mode.active{background:var(--card-solid);color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,0.12)}
 .seg .ico{width:18px;height:18px}
 .abtn{flex:1;height:50px;border-radius:14px;border:0;font-family:inherit;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;-webkit-appearance:none;transition:transform .15s}
 .abtn:active{transform:scale(.97)}
@@ -60,7 +75,7 @@
 .sw input:checked+i::after{transform:translateX(20px)}
 .sw input:disabled+i{opacity:.4}
 .lnote{font-size:11.5px;color:var(--text3);line-height:1.5;margin-top:10px}
-.radar-credit{position:fixed;right:14px;bottom:calc(var(--sheet-h,300px) + 8px);z-index:998;pointer-events:none;background:rgba(28,28,30,0.82);color:#fff;font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:10px;display:none;max-width:70vw;line-height:1.35}
+.radar-credit{position:fixed;right:14px;left:14px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:30px;line-height:18px;bottom:calc(var(--sheet-h,300px) + 8px);z-index:998;pointer-events:none;background:rgba(28,28,30,0.82);color:#fff;font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:10px;display:none;max-width:70vw;line-height:1.35}
 .radar-credit.active{display:block}
 #radarImg{position:absolute;pointer-events:none;opacity:.62;mix-blend-mode:multiply;z-index:2;display:none;image-rendering:auto}
 .sos-btn{height:34px;padding:0 14px;border-radius:17px;background:#ff3b30;color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;display:flex;align-items:center;box-shadow:0 4px 14px rgba(255,59,48,.3);border:0;cursor:pointer;font-family:inherit}
@@ -73,11 +88,16 @@
   --sep:rgba(60,60,67,0.08);--sep-heavy:rgba(60,60,67,0.18);
   --blue:#007aff;--blue-light:rgba(0,122,255,0.1);--blue-glow:rgba(0,122,255,0.25);
   --green:#34c759;--orange:#ff9500;--red:#ff3b30;--red-light:rgba(255,59,48,0.1);
+  --green-t:#1e8e3e;--orange-t:#b45309;--red-t:#d70015;   /* גוני טקסט קריאים על רקע בהיר */
   --purple:#af52de;--purple-light:rgba(175,82,222,0.1);
   --radius:18px;--radius-md:14px;--radius-sm:10px;
   --blur:saturate(180%) blur(20px);--blur-heavy:saturate(200%) blur(40px);
   --shadow-sm:0 1px 3px rgba(0,0,0,0.04);--shadow-md:0 4px 20px rgba(0,0,0,0.06);--shadow-lg:0 8px 40px rgba(0,0,0,0.08);
   --safe-bottom:max(env(safe-area-inset-bottom,0px),12px);
+  --sat:env(safe-area-inset-top,0px);
+  --top-h:calc(var(--sat) + 54px);          /* גובה הפס העליון */
+  --under-top:calc(var(--top-h) + 8px);     /* השורה הראשונה מתחת לפס העליון */
+  --ctrl-top:calc(var(--under-top) + 66px + var(--banners-h,0px)); /* כפתורי הצד: מתחת לשדה החיפוש */
 }
 html,body{height:100%;width:100%;overflow:hidden;position:fixed;top:0;left:0}
 body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
@@ -97,7 +117,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .splash-status{margin-top:16px;font-size:13px;color:var(--text4);animation:fadeUp .4s .4s ease forwards;opacity:0}
 
 /* Top Bar */
-.topbar{position:fixed;top:0;left:0;right:0;z-index:1000;min-height:54px;padding:env(safe-area-inset-top,8px) 16px 8px;display:flex;align-items:flex-end;justify-content:space-between;background:rgba(242,242,247,0.78);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:0.5px solid var(--sep)}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--top-h);padding:var(--sat) 16px 0;display:flex;align-items:flex-end;justify-content:space-between;background:rgba(242,242,247,0.78);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:0.5px solid var(--sep)}
 .source-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.7);padding:6px 14px 6px 10px;border-radius:22px;border:0.5px solid var(--sep);box-shadow:var(--shadow-sm);transition:all .3s}
 .source-pill.gps .pill-dot{background:var(--green);box-shadow:0 0 6px rgba(52,199,89,0.5)}
 .source-pill.cell .pill-dot{background:var(--orange);box-shadow:0 0 6px rgba(255,149,0,0.5)}
@@ -120,7 +140,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .sos-pos b{color:#fff;font-size:16px;direction:ltr;unicode-bidi:isolate}
 .sos-note{margin-top:auto;font-size:12px;color:#8e8e93;text-align:center;padding-top:14px}
 .open-in{display:flex;gap:8px;margin-top:10px}
-.open-in a{flex:1;text-align:center;padding:9px 6px;border-radius:12px;background:var(--blue-light);color:var(--blue);font-weight:700;font-size:13px;text-decoration:none;border:0.5px solid rgba(0,122,255,.25)}
+.open-in a{flex:1;text-align:center;padding:9px 6px;border-radius:12px;background:#e4efff;color:#0a5fd1;font-weight:700;font-size:13px;text-decoration:none;border:0.5px solid rgba(0,122,255,.25)}
 .search-go{background:none;border:0;padding:0;cursor:pointer;color:inherit;display:flex}
 .acc-chip{font-size:12px;font-weight:600;color:var(--text3);background:rgba(255,255,255,0.65);padding:6px 12px;border-radius:18px;border:0.5px solid var(--sep)}
 .about-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.65);border:0.5px solid var(--sep);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:16px;color:var(--text3);transition:all .15s}
@@ -148,26 +168,26 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 
 /* Search */
 /* התראות (שיבוש GPS, ניווט משוער) נערמות במכל אחד; הגובה שלו דוחף את החיפוש והכפתורים */
-.banners{position:fixed;top:62px;left:14px;right:14px;z-index:1002;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.banners{position:fixed;top:var(--under-top);left:14px;right:14px;z-index:1002;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .banners>*{pointer-events:auto;position:static!important;top:auto!important;left:auto!important;right:auto!important}
-.search-area{position:fixed;top:calc(62px + var(--banners-h,0px));left:14px;right:14px;z-index:999;transition:top .3s}
+.search-area{position:fixed;top:calc(var(--under-top) + var(--banners-h,0px));left:14px;right:14px;z-index:999;transition:top .3s}
 .search-area.navhide{display:none}
 /* שבבי העזרה מופיעים רק כשהחיפוש פעיל או כששכבה דולקת — אחרת הם מסתירים את כפתורי הצד */
 .help-chips{display:none;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
-.search-area.focus .help-chips,.search-area.haslayer .help-chips{display:flex}
+.search-area.focus .help-chips{display:flex}
 .help-chips::-webkit-scrollbar{display:none}
 .help-chip{flex:0 0 auto;padding:7px 12px;border-radius:14px;background:var(--card);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:0.5px solid var(--sep);font-size:13px;font-weight:600;color:var(--text);cursor:pointer;box-shadow:var(--shadow-sm);font-family:inherit}
 .help-chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
-.turn{position:fixed;top:calc(62px + var(--banners-h,0px));left:14px;right:14px;z-index:1003;display:none;align-items:center;gap:12px;background:var(--card-solid);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow-md);border:0.5px solid var(--sep)}
+.turn{position:fixed;top:calc(var(--under-top) + var(--banners-h,0px));left:14px;right:14px;z-index:1003;display:none;align-items:center;gap:12px;background:var(--card-solid);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow-md);border:0.5px solid var(--sep)}
 .turn.active{display:flex}
 .turn-arrow{font-size:34px;line-height:1;width:44px;text-align:center}
 .turn-main{flex:1;min-width:0}
 .turn-dist{font-size:24px;font-weight:800;color:var(--blue);line-height:1.1}
-.turn-text{font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.turn-text{font-size:15px;font-weight:600;color:var(--text);line-height:1.25;max-height:2.5em;overflow:hidden}
 .turn-stop{border:0;background:var(--red-light);color:var(--red);border-radius:12px;padding:8px 12px;font-weight:700;font-family:inherit;font-size:14px;cursor:pointer}
 .btn-nav{width:100%;margin-top:10px;background:var(--blue);color:#fff;border:0;border-radius:14px;padding:12px;font-weight:800;font-size:16px;font-family:inherit;cursor:pointer;box-shadow:0 4px 16px rgba(0,122,255,0.25)}
 .credit-line{font-size:10.5px;color:var(--text3);text-align:center;margin-top:10px}
-.offline-pill{position:fixed;top:calc(62px + var(--banners-h,0px) + 58px);left:50%;transform:translateX(-50%);z-index:1004;background:#1c1c1e;color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:12px;display:none}
+.offline-pill{position:fixed;bottom:calc(var(--sheet-h,300px) + 10px);left:14px;z-index:1004;background:#1c1c1e;color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:12px;display:none}
 .offline-pill.active{display:block}
 @media (orientation:landscape) and (max-height:520px){
   .sheet{left:auto;right:0;width:46vw;max-width:440px;top:calc(env(safe-area-inset-top,0px) + 56px);bottom:0;border-radius:22px 0 0 0;overflow-y:auto;padding-bottom:12px}
@@ -190,16 +210,21 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .result-icon{width:34px;height:34px;border-radius:10px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
 .result-text{flex:1;min-width:0}
 .result-name{font-size:15px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.result-addr{font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result-addr{font-size:12.5px;color:var(--text3);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 /* Side Controls */
-.side-controls{position:fixed;top:calc(128px + var(--banners-h,0px));left:14px;z-index:998;display:flex;flex-direction:column;gap:8px;transition:top .3s}
+.side-controls{position:fixed;top:var(--ctrl-top);left:14px;z-index:998;display:flex;flex-direction:column;gap:8px;transition:top .3s}
+/* בזמן ניווט כרטיס הפנייה גבוה משדה החיפוש — הכפתורים יורדים; בזמן הקלדה הם מתפנים לרשימת התוצאות */
+body.navon .side-controls{display:none}
+body.searching .side-controls,body.layers-open .side-controls{opacity:0;pointer-events:none}
+body.navon .sheet{max-height:calc(100vh - var(--under-top) - var(--banners-h,0px) - var(--turn-h,84px) - 206px);max-height:calc(100dvh - var(--under-top) - var(--banners-h,0px) - var(--turn-h,84px) - 206px)}
+.offline-pill{display:none!important}
 .ctrl-btn{width:48px;height:48px;border-radius:var(--radius-md);background:var(--card);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:0.5px solid var(--sep);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-md);transition:all .2s}
 .ctrl-btn:active{transform:scale(.88);background:var(--card-hover)}
 .compass-svg{transition:transform .35s}
 
 /* Bottom Sheet */
-.sheet{position:fixed;bottom:0;left:0;right:0;z-index:999;background:var(--card);backdrop-filter:var(--blur-heavy);-webkit-backdrop-filter:var(--blur-heavy);border-radius:22px 22px 0 0;border-top:0.5px solid var(--sep);box-shadow:0 -4px 32px rgba(0,0,0,0.06);padding:6px 18px var(--safe-bottom)}
+.sheet{position:fixed;bottom:0;left:0;right:0;z-index:999;max-height:calc(100vh - var(--ctrl-top) - 196px);max-height:calc(100dvh - var(--ctrl-top) - 196px);overflow-y:auto;overscroll-behavior:contain;background:var(--card);backdrop-filter:var(--blur-heavy);-webkit-backdrop-filter:var(--blur-heavy);border-radius:22px 22px 0 0;border-top:0.5px solid var(--sep);box-shadow:0 -4px 32px rgba(0,0,0,0.06);padding:6px 18px var(--safe-bottom)}
 .sheet-grip{width:36px;height:5px;border-radius:3px;background:rgba(0,0,0,0.1);margin:4px auto 14px}
 
 /* Nav Panel */
@@ -208,7 +233,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 @keyframes navSlide{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
 .nav-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .nav-info{flex:1}
-.nav-label{font-size:12px;color:var(--text3);margin-bottom:3px}
+.nav-label{font-size:12.5px;color:var(--text3);margin-bottom:3px;line-height:1.3}
 .nav-distance{font-size:32px;font-weight:900;color:var(--blue);line-height:1;letter-spacing:-1px}
 .nav-time{font-size:14px;color:var(--text2);font-weight:600;margin-top:4px}
 .nav-bearing{font-size:13px;color:var(--text3);margin-top:2px}
@@ -229,9 +254,9 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .metrics::-webkit-scrollbar{display:none}
 .metric-card{flex:1;min-width:68px;background:var(--bg);border-radius:var(--radius-md);padding:10px 6px;text-align:center}
-.metric-label{font-size:9px;color:var(--text4);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.metric-label{font-size:9px;color:#6e6e73;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .metric-value{font-size:20px;font-weight:800;color:var(--text);line-height:1.1;transition:color .3s}
-.metric-unit{font-size:10px;color:var(--text3);margin-top:2px}
+.metric-unit{font-size:10px;color:#6e6e73;margin-top:2px}
 
 /* Actions */
 .actions{display:flex;gap:10px}
@@ -248,8 +273,9 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .credit-tag .dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.4)}
 
 /* Toast */
-.toast{position:fixed;top:68px;left:50%;z-index:1100;transform:translateX(-50%) translateY(-100px);background:var(--card-solid);border-radius:var(--radius-md);padding:11px 22px;font-size:14px;font-weight:600;color:var(--text);box-shadow:var(--shadow-lg);border:0.5px solid var(--sep);transition:transform .45s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:92%}
-.toast.show{transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;bottom:calc(var(--sheet-h,300px) + var(--stack-h,0px) + 12px);left:50%;z-index:1100;max-width:calc(100vw - 28px);text-align:center;transform:translateX(-50%);opacity:0;transition:opacity .25s;background:var(--card-solid);border-radius:var(--radius-md);padding:11px 22px;font-size:14px;font-weight:600;color:var(--text);box-shadow:var(--shadow-lg);border:0.5px solid var(--sep);transition:transform .45s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:92%}
+.toast.show{opacity:1}
+body.radar-on{--stack-h:46px}
 
 /* MapLibre overrides */
 .maplibregl-ctrl-attrib{font-size:9px!important;background:rgba(242,242,247,0.75)!important;backdrop-filter:blur(8px)!important;border-radius:6px 0 0 0!important}
@@ -395,7 +421,7 @@ const MAPBOX_TOKEN='__MAPBOX_TOKEN__';   // מוזרק בזמן הבנייה ב�
 const USE_MAPBOX=/^pk\./.test(MAPBOX_TOKEN);
 let GL=window.maplibregl||null;
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function cleanName(s){return String(s==null?'':s).replace(/<[^>]*>?/g,'').replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,80)}
+function cleanName(s){return String(s==null?'':s).replace(/<[^>]*>?/g,'').replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,120)}
 /* fetch עם זמן מוגבל; ביטול מכוון (מסלול חדש) מסומן בנפרד מפקיעת זמן */
 function timedFetch(url,ms,ctl){const ac=ctl||new AbortController();const tm=setTimeout(()=>ac.abort('timeout'),ms);return fetch(url,{signal:ac.signal}).finally(()=>clearTimeout(tm))}
 /* עברית בתוויות המפה: בלי התוסף הזה האותיות מצוירות הפוך */
@@ -461,7 +487,7 @@ const DR={
   setHeading(h){this.heading=h},
   elapsed(){return Math.round((Date.now()-this.startTime)/1000)},
   estAcc(){return Math.round(5+this.steps*0.3+this.elapsed()*0.1)},
-  updateUI(){document.getElementById('drSteps').textContent=this.steps;document.getElementById('drTime').textContent=this.elapsed();const f=document.getElementById('drConf');f.style.width=this.confidence+'%';f.style.background=this.confidence>60?'var(--purple)':this.confidence>30?'var(--orange)':'var(--red)';document.getElementById('drDetail').innerHTML=`מיקום משוער · ${this.steps} צעדים · ${this.elapsed()} שנ׳ · ±${this.estAcc()}m`}
+  updateUI(){const ds=document.getElementById('drSteps');if(!ds){console.warn('DR ui missing');return}ds.textContent=this.steps;document.getElementById('drTime').textContent=this.elapsed();const f=document.getElementById('drConf');f.style.width=this.confidence+'%';f.style.background=this.confidence>60?'var(--purple)':this.confidence>30?'var(--orange)':'var(--red)';document.getElementById('drDetail').innerHTML=`מיקום משוער · ${this.steps} צעדים · ${this.elapsed()} שנ׳ · ±${this.estAcc()}m`}
 };
 
 /* ═══ Spoof Engine ═══ */
@@ -695,8 +721,8 @@ const App={
     if(!this.firstFix||this._wantCenter||upgrade){this.firstFix=true;this._wantCenter=false;this._flyZoom=z;this._flyT=Date.now();this.map.flyTo({center:[lng,lat],zoom:z,duration:1500,pitch:acc<80?45:0})}
     this.setSource(src.n+' פעיל',src.c);
     document.getElementById('accChip').textContent=`±${Math.round(acc)}m`;
-    const ms=document.getElementById('mSrc');ms.textContent=src.n;ms.style.color=src.clr==='green'?'var(--green)':src.clr==='orange'?'var(--orange)':'var(--red)';
-    const ma=document.getElementById('mAcc');ma.textContent=Math.round(acc);ma.style.color=acc<50?'var(--green)':acc<200?'var(--orange)':'var(--red)';
+    const ms=document.getElementById('mSrc');ms.textContent=src.n;ms.style.color=src.clr==='green'?'var(--green-t)':src.clr==='orange'?'var(--orange-t)':'var(--red-t)';
+    const ma=document.getElementById('mAcc');ma.textContent=Math.round(acc);ma.style.color=acc<50?'var(--green-t)':acc<200?'var(--orange-t)':'var(--red-t)';
     if(spd!==null&&spd>=0)document.getElementById('mSpd').textContent=Math.round(spd*3.6);
     const h=Number.isFinite(hdg)?hdg:this.heading;if(h!==null&&Number.isFinite(h))document.getElementById('mHdg').textContent=this.heb(h);
     if(alt!==null)document.getElementById('mAlt').textContent=Math.round(alt);
@@ -736,18 +762,26 @@ const App={
     try{
       let items=[];
       if(USE_MAPBOX){
-        const r=await(await timedFetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=il&language=he&limit=5`,8000,ac)).json();
-        items=(r.features||[]).map(f=>({nm:f.text||f.place_name.split(',')[0],ad:f.place_name.split(',').slice(1,3).join(', '),lat:f.center[1],lng:f.center[0]}));
+        const prox=this.pos?`&proximity=${this.pos.lng},${this.pos.lat}`:'';
+        const r=await(await timedFetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=il&language=he&limit=5${prox}`,8000,ac)).json();
+        items=(r.features||[]).map(f=>({nm:(f.address?f.text+' '+f.address:f.text)||f.place_name.split(',')[0],ad:f.place_name.split(',').slice(1).join(', ').replace(/,\s*ישראל$/,''),full:f.place_name.replace(/,\s*ישראל$/,''),lat:f.center[1],lng:f.center[0],addr:(f.place_type||[]).includes('address')}));
+        // כתובת עם מספר בית שמפבוקס לא פתר ברמת הבית — משלימים מ־OpenStreetMap (Nominatim)
+        if(/\d/.test(q)&&!items.some(i=>i.addr)){
+          try{const res=await timedFetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=jsonv2&countrycodes=il&accept-language=he&limit=3&addressdetails=1`,6000,ac);const nr=await res.json();
+            const extra=(Array.isArray(nr)?nr:[]).filter(f=>f.address&&f.address.house_number).map(f=>{const a=f.address;const street=(a.road||'')+' '+a.house_number;const city=a.city||a.town||a.village||'';return{nm:street.trim(),ad:city,full:(street+', '+city).trim(),lat:+f.lat,lng:+f.lon,addr:true}});
+            items=[...extra,...items];
+          }catch(e){}
+        }
       }else{
         const res=await timedFetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=jsonv2&countrycodes=il&accept-language=he&limit=5`,8000,ac);
         if(res.status===429||res.status>=500){this.toast('שירות החיפוש עמוס — נסה שוב בעוד רגע');return}
         const r=await res.json();
-        items=(Array.isArray(r)?r:[]).map(f=>{const parts=(f.display_name||'').split(',').map(s=>s.trim());return{nm:f.name||parts[0],ad:parts.slice(1,3).join(', '),lat:+f.lat,lng:+f.lon}});
+        items=(Array.isArray(r)?r:[]).map(f=>{const parts=(f.display_name||'').split(',').map(s=>s.trim()).filter(s=>s&&s!=='ישראל');return{nm:f.name||parts[0],ad:parts.slice(1,5).join(', '),full:parts.slice(0,5).join(', '),lat:+f.lat,lng:+f.lon}});
       }
       if(ac!==this._sc)return;
       c.innerHTML='';
       if(!items.length){none();return}
-      items.forEach(it=>{const nm=cleanName(it.nm);c.appendChild(row(nm,cleanName(it.ad),()=>{this.setDest(it.lat,it.lng,nm);c.classList.remove('open');document.getElementById('searchInput').value=nm}))});
+      items.forEach(it=>{const nm=cleanName(it.nm),full=cleanName(it.full||it.nm);c.appendChild(row(nm,cleanName(it.ad),()=>{this.setDest(it.lat,it.lng,nm,full);c.classList.remove('open');document.getElementById('searchInput').value=full}))});
       c.classList.add('open');
     }catch(e){
       if(ac!==this._sc)return;
@@ -756,8 +790,8 @@ const App={
   },
 
   /* ═══ מסלול (OSRM לנסיעה · Valhalla להליכה) ═══ */
-  async setDest(lat,lng,name){
-    name=cleanName(name)||`${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  async setDest(lat,lng,name,full){
+    name=cleanName(name)||`${lat.toFixed(4)}, ${lng.toFixed(4)}`;full=cleanName(full||'');
     this.dest={lat,lng,name};
     // Dest marker — הטקסט נכנס כ־textContent, לא כ־HTML
     if(this._destMarker)this._destMarker.remove();
@@ -768,7 +802,8 @@ const App={
     if(this.map)this._destMarker=new GL.Marker({element:el,anchor:'bottom'}).setLngLat([lng,lat]).addTo(this.map);
 
     document.getElementById('navPanel').classList.add('active');document.querySelector('.sheet').classList.add('hasdest');
-    document.getElementById('navLabel').textContent='ניווט ל: '+name;
+    try{document.getElementById('searchInput').blur()}catch(e){}document.getElementById('searchArea').classList.remove('focus');document.body.classList.remove('searching');document.getElementById('resultsList').classList.remove('open');
+    document.getElementById('navLabel').textContent='ניווט ל: '+(full&&full!==name?full:name);
     document.getElementById('navDistance').textContent='—';document.getElementById('navTime').textContent='';
     // פתיחה באפליקציות ניווט אחרות
     const oi=document.getElementById('openIn');oi.innerHTML='';
@@ -881,7 +916,7 @@ const App={
     if(!this.dest){this.toast('⚠️ בחר יעד');return}
     if(!this.pos){this.toast('⚠️ אין עדיין מיקום');this.locate();return}
     this._nav=true;this._stepIdx=0;this._spokenIdx=-1;
-    document.getElementById('turn').classList.add('active');document.getElementById('searchArea').classList.add('navhide');
+    document.getElementById('turn').classList.add('active');document.getElementById('searchArea').classList.add('navhide');document.body.classList.add('navon');
     document.getElementById('btnNavT').textContent='עצור ניווט';
     if(!this.tracking)this.startTrack();
     try{if(navigator.wakeLock)this._wake=await navigator.wakeLock.request('screen')}catch(e){}
@@ -891,7 +926,7 @@ const App={
   },
   stopNav(){
     this._nav=false;
-    document.getElementById('turn').classList.remove('active');document.getElementById('searchArea').classList.remove('navhide');
+    document.getElementById('turn').classList.remove('active');document.getElementById('searchArea').classList.remove('navhide');document.body.classList.remove('navon');
     document.getElementById('btnNavT').textContent='התחל ניווט';
     try{if(this._wake){this._wake.release();this._wake=null}}catch(e){}
     try{speechSynthesis.cancel()}catch(e){}
@@ -952,7 +987,7 @@ const App={
   /* ═══ מכ״ם גשם של השירות המטאורולוגי: תמונה אחת כל 5 דקות, נטענת ישירות מהשירות — בלי שרת שלנו ═══ */
   setRadar(on){
     this._radar=on;
-    document.getElementById('radarCredit').classList.toggle('active',on);
+    document.getElementById('radarCredit').classList.toggle('active',on);document.body.classList.toggle('radar-on',on);this._placeToast();
     clearInterval(this._radarT);
     if(!on){document.getElementById('radarImg').style.display='none';return}
     this._loadRadar();this._radarT=setInterval(()=>this._loadRadar(),5*60*1000);
@@ -1004,7 +1039,9 @@ const App={
   dist(a,b,c,d){const R=6371000,p=Math.PI/180,dl=(c-a)*p,dn=(d-b)*p,x=Math.sin(dl/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(dn/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))},
   bear(a,b,c,d){const p=Math.PI/180,y=Math.sin((d-b)*p)*Math.cos(c*p),x=Math.cos(a*p)*Math.sin(c*p)-Math.sin(a*p)*Math.cos(c*p)*Math.cos((d-b)*p);return(Math.atan2(y,x)*180/Math.PI+360)%360},
 
-  toast(m){m=String(m).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]\uFE0F?\s*/gu,'').trim();const t=document.getElementById('toast');t.textContent=m;t.className='toast show';clearTimeout(this._tt);this._tt=setTimeout(()=>t.classList.remove('show'),4000)},
+  toast(m){m=String(m).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]\uFE0F?\s*/gu,'').trim();const t=document.getElementById('toast');t.textContent=m;
+    this._placeToast();t.className='toast show';clearTimeout(this._tt);this._tt=setTimeout(()=>t.classList.remove('show'),4000)},
+  _placeToast(){try{const t=document.getElementById('toast'),sh=document.querySelector('.sheet').getBoundingClientRect(),cr=document.getElementById('radarCredit');const base=Math.round(innerHeight-sh.top);cr.style.bottom=(base+8)+'px';const stack=cr.classList.contains('active')?30+8:0;t.style.bottom=(base+stack+12)+'px'}catch(e){}},
   hideSplash(){document.getElementById('splash').classList.add('hidden')},
   recenter(){if(this.pos&&this.ready)this.map.flyTo({center:[this.pos.lng,this.pos.lat],zoom:16,pitch:45,duration:800})},
 
@@ -1079,26 +1116,28 @@ const App={
     document.getElementById('nightBtn').onclick=()=>this.setTheme(document.documentElement.dataset.theme!=='dark');
     // שכבות
     const ls=document.getElementById('lsheet');
-    document.getElementById('layersBtn').onclick=()=>{ls.classList.add('active');const tr=document.getElementById('lTraffic');const has=!!(this.map&&this.map.getLayer('traffic-line'));tr.disabled=!has;tr.checked=has&&this._trafficVisible!==false;document.getElementById('trafficNote').textContent=has?'עומסים בזמן אמת':'זמין רק במפת Mapbox';};
-    document.getElementById('lsheetClose').onclick=()=>ls.classList.remove('active');
+    document.getElementById('layersBtn').onclick=()=>{ls.classList.add('active');document.body.classList.add('layers-open');const tr=document.getElementById('lTraffic');const has=!!(this.map&&this.map.getLayer('traffic-line'));tr.disabled=!has;tr.checked=has&&this._trafficVisible!==false;document.getElementById('trafficNote').textContent=has?'עומסים בזמן אמת':'זמין רק במפת Mapbox';};
+    document.getElementById('lsheetClose').onclick=()=>{ls.classList.remove('active');document.body.classList.remove('layers-open')};
     document.querySelectorAll('#baseSeg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#baseSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');this.setBase(b.dataset.base)});
     document.getElementById('lTraffic').onchange=e=>{if(this.map&&this.map.getLayer('traffic-line')){this._trafficVisible=e.target.checked;this.map.setLayoutProperty('traffic-line','visibility',e.target.checked?'visible':'none')}};
     document.getElementById('lRadar').onchange=e=>this.setRadar(e.target.checked);
-    document.addEventListener('click',e=>{if(ls.classList.contains('active')&&!e.target.closest('#lsheet,#layersBtn'))ls.classList.remove('active')});
+    document.addEventListener('click',e=>{if(ls.classList.contains('active')&&!e.target.closest('#lsheet,#layersBtn')){ls.classList.remove('active');document.body.classList.remove('layers-open')}});
     if(this.map){this.map.on('move',()=>this._placeRadar());this.map.on('resize',()=>this._placeRadar())}
     // גובה הלוח התחתון — לקרדיט המכ״ם ולריפוד המפה
-    const sheetEl=document.querySelector('.sheet');const setSH=()=>document.documentElement.style.setProperty('--sheet-h',Math.round(innerHeight-sheetEl.getBoundingClientRect().top)+'px');
+    const sheetEl=document.querySelector('.sheet');const setSH=()=>requestAnimationFrame(()=>{document.documentElement.style.setProperty('--sheet-h',Math.round(innerHeight-sheetEl.getBoundingClientRect().top)+'px');this._placeToast()});
     if(window.ResizeObserver)new ResizeObserver(setSH).observe(sheetEl);setSH();
     document.getElementById('btnNav').onclick=()=>this._nav?this.stopNav():this.startNav();
     document.getElementById('turnStop').onclick=()=>this.stopNav();
     document.querySelectorAll('.help-chip').forEach(ch=>ch.onclick=()=>this.loadHelp(ch.classList.contains('on')?null:ch.dataset.kind));
-    const sa=document.getElementById('searchArea');sa.addEventListener('focusin',()=>sa.classList.add('focus'));sa.addEventListener('focusout',()=>setTimeout(()=>{if(!sa.contains(document.activeElement))sa.classList.remove('focus')},150));
+    const sa=document.getElementById('searchArea');sa.addEventListener('focusin',()=>{sa.classList.add('focus');document.body.classList.add('searching')});sa.addEventListener('focusout',()=>setTimeout(()=>{if(!sa.contains(document.activeElement)){sa.classList.remove('focus');document.body.classList.remove('searching')}},150));
+    document.addEventListener('click',e=>{if(!e.target.closest('.search-area')){sa.classList.remove('focus');document.body.classList.remove('searching')}});
+    const tn=document.getElementById('turn');if(window.ResizeObserver)new ResizeObserver(()=>requestAnimationFrame(()=>document.documentElement.style.setProperty('--turn-h',Math.round(tn.getBoundingClientRect().height)+'px'))).observe(tn);
     // גובה ההתראות דוחף את החיפוש והכפתורים
-    const bn=document.getElementById('banners');const setBH=()=>{const h=bn.getBoundingClientRect().height;document.documentElement.style.setProperty('--banners-h',(h>4?h+8:0)+'px')};
+    const bn=document.getElementById('banners');const setBH=()=>requestAnimationFrame(()=>{const h=bn.getBoundingClientRect().height;document.documentElement.style.setProperty('--banners-h',(h>4?h+8:0)+'px')});
     if(window.ResizeObserver)new ResizeObserver(setBH).observe(bn);setBH();
     // חיבור
-    const op=document.getElementById('offlinePill');const onl=()=>{op.classList.toggle('active',!navigator.onLine);if(!navigator.onLine)this.toast('📴 אין חיבור — המפה שנשמרה והמיקום האחרון עדיין זמינים')};
-    window.addEventListener('online',()=>{op.classList.remove('active');this.toast('✅ החיבור חזר')});window.addEventListener('offline',onl);if(!navigator.onLine)onl();
+    const onl=()=>{if(!navigator.onLine){this.setSource('אין חיבור · מידע אחרון','none');this.toast('אין חיבור — המפה שנשמרה והמיקום האחרון עדיין זמינים')}};
+    window.addEventListener('online',()=>{this.toast('החיבור חזר');if(this.pos)this.render()});window.addEventListener('offline',onl);if(!navigator.onLine)onl();
     // מיקום אחרון שנשמר — מוצג עד שמגיע קיבוע
     try{const lp=JSON.parse(localStorage.getItem('ig-lastpos')||'null');if(lp&&!this.pos){const age=Math.round((Date.now()-lp.t)/60000);setTimeout(()=>{if(!this.pos&&this.ready){this.marker.setLngLat([lp.lng,lp.lat]).addTo(this.map);this.map.jumpTo({center:[lp.lng,lp.lat],zoom:14});this.setSource('מיקום אחרון · לפני '+(age<60?age+' דק׳':Math.round(age/60)+' שע׳'),'none');this.hideSplash()}},7000)}}catch(e){}
     // Map long-press / click to set destination
