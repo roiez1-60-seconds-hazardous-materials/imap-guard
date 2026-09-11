@@ -7,8 +7,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f2f2f7">
 <title>iMap Guard - ניווט חירום</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
+<link href="maplibre-gl.css" rel="stylesheet">
+<script src="maplibre-gl.js" onerror="window.__glFailed=true"></script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png" type="image/png">
+<script>/* מכסה על מסך הפתיחה: אחרי 6 שניות הממשק נפתח גם אם המפה או המיקום מתעכבים */setTimeout(function(){var s=document.getElementById("splash");if(s)s.classList.add("hidden")},6000)</script>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Secular+One&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -52,6 +56,22 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.85)}}
 .pill-label{font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap}
 .topbar-right{display:flex;align-items:center;gap:8px}
+.sos-btn{height:34px;padding:0 14px;border-radius:17px;background:#ff3b30;color:#fff;font-weight:800;font-size:14px;letter-spacing:.02em;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(255,59,48,.35);border:0;cursor:pointer;font-family:inherit}
+.sos{position:fixed;inset:0;z-index:3000;background:rgba(28,28,30,.97);color:#fff;display:none;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 18px) 18px calc(env(safe-area-inset-bottom,0px) + 18px);overflow:auto}
+.sos.active{display:flex}
+.sos-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.sos-head h2{margin:0;font-size:22px;font-weight:800}
+.sos-close{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;border:0;font-size:20px;cursor:pointer}
+.sos-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sos-tile{min-height:112px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-decoration:none;color:#fff;font-weight:800;font-size:20px;border:0;cursor:pointer;font-family:inherit}
+.sos-tile small{font-size:13px;font-weight:500;opacity:.9}
+.sos-100{background:#0a84ff}.sos-101{background:#ff3b30}.sos-102{background:#ff9500}.sos-loc{background:#30d158;color:#0b2e14}
+.sos-pos{margin-top:14px;font-size:14px;line-height:1.6;color:#d1d1d6;background:rgba(255,255,255,.08);border-radius:14px;padding:12px 14px}
+.sos-pos b{color:#fff;font-size:16px;direction:ltr;unicode-bidi:isolate}
+.sos-note{margin-top:auto;font-size:12px;color:#8e8e93;text-align:center;padding-top:14px}
+.open-in{display:flex;gap:8px;margin-top:10px}
+.open-in a{flex:1;text-align:center;padding:9px 6px;border-radius:12px;background:var(--blue-light);color:var(--blue);font-weight:700;font-size:13px;text-decoration:none;border:0.5px solid rgba(0,122,255,.25)}
+.search-go{background:none;border:0;padding:0;cursor:pointer;color:inherit;display:flex}
 .acc-chip{font-size:12px;font-weight:600;color:var(--text3);background:rgba(255,255,255,0.65);padding:6px 12px;border-radius:18px;border:0.5px solid var(--sep)}
 .about-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.65);border:0.5px solid var(--sep);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:16px;color:var(--text3);transition:all .15s}
 .about-btn:active{background:rgba(255,255,255,0.9);transform:scale(.9)}
@@ -179,8 +199,21 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
   </div>
   <div class="topbar-right">
     <div class="acc-chip" id="accChip">—</div>
+    <button class="sos-btn" id="sosBtn" aria-label="חירום">🆘 חירום</button>
     <a href="about.html" class="about-btn" title="אודות">ℹ</a>
   </div>
+</div>
+
+<div class="sos" id="sos" role="dialog" aria-modal="true" aria-labelledby="sosTitle">
+  <div class="sos-head"><h2 id="sosTitle">חירום</h2><button class="sos-close" id="sosClose" aria-label="סגור">✕</button></div>
+  <div class="sos-grid">
+    <a class="sos-tile sos-100" href="tel:100">100<small>משטרה</small></a>
+    <a class="sos-tile sos-101" href="tel:101">101<small>מד״א</small></a>
+    <a class="sos-tile sos-102" href="tel:102">102<small>כיבוי והצלה</small></a>
+    <button class="sos-tile sos-loc" id="sosShare">📍<small>שלח את המיקום שלי</small></button>
+  </div>
+  <div class="sos-pos" id="sosPos">מאתר מיקום…</div>
+  <div class="sos-note">השיחה מתבצעת דרך הטלפון. שליחת המיקום פותחת את תפריט השיתוף עם נ״צ, דיוק וקישור למפה.</div>
 </div>
 
 <div class="spoof-alert" id="spoofAlert">
@@ -203,8 +236,8 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 
 <div class="search-area" id="searchArea">
   <div class="search-field">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="searchInput" placeholder="חפש יעד — כתובת, עיר, מקום" autocomplete="off" spellcheck="false">
+    <button class="search-go" id="searchGo" aria-label="חפש"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+    <input type="search" id="searchInput" placeholder="חפש יעד — כתובת, עיר, מקום" autocomplete="off" spellcheck="false" enterkeyhint="search">
   </div>
   <div class="results-list" id="resultsList"></div>
 </div>
@@ -234,6 +267,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
         </div>
         <button class="nav-dismiss" id="navDismiss">✕</button>
       </div>
+      <div class="open-in" id="openIn"></div>
     </div>
   </div>
   <div class="metrics">
@@ -263,10 +297,14 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
    מפתח מפבוקס מלא (pk.…) → Mapbox: סגנון Streets, תנועה חיה, חיפוש ומסלולים של מפבוקס — המראה המקורי. */
 const MAPBOX_TOKEN='__MAPBOX_TOKEN__';   // מוזרק בזמן הבנייה בוורסל ממשתנה הסביבה MAPBOX_TOKEN (מפתח ציבורי pk., מוגבל לכתובת האתר)
 const USE_MAPBOX=/^pk\./.test(MAPBOX_TOKEN);
-let GL=maplibregl;
+let GL=window.maplibregl||null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function cleanName(s){return String(s==null?'':s).replace(/<[^>]*>?/g,'').replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,80)}
+/* fetch עם זמן מוגבל; ביטול מכוון (מסלול חדש) מסומן בנפרד מפקיעת זמן */
+function timedFetch(url,ms,ctl){const ac=ctl||new AbortController();const tm=setTimeout(()=>ac.abort('timeout'),ms);return fetch(url,{signal:ac.signal}).finally(()=>clearTimeout(tm))}
 /* עברית בתוויות המפה: בלי התוסף הזה האותיות מצוירות הפוך */
 function loadMapEngine(){
-  if(!USE_MAPBOX){try{GL.setRTLTextPlugin('rtl-text.js',true);}catch(e){}return Promise.resolve();}
+  if(!USE_MAPBOX){try{if(GL)GL.setRTLTextPlugin('rtl-text.js',true);}catch(e){}return Promise.resolve();}
   return new Promise((res,rej)=>{
     const css=document.createElement('link');css.rel='stylesheet';css.href='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';document.head.appendChild(css);
     const s=document.createElement('script');s.src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
@@ -324,8 +362,12 @@ const App={
 
   init(){
     try{
-      this.buildMap();this.sensors();this.events();
-    }catch(e){console.error(e);document.getElementById('splashStatus').textContent='שגיאה: '+e.message}
+      if(!GL){document.getElementById('splashStatus').textContent='ספריית המפה לא נטענה — בדוק חיבור';this.toast('⚠️ המפה לא נטענה — המיקום עדיין עובד')}
+      else this.buildMap();
+    }catch(e){console.error(e);document.getElementById('splashStatus').textContent='שגיאה במפה: '+e.message}
+    try{this.sensors();this.events();}catch(e){console.error(e)}
+    document.getElementById('splashStatus').textContent='מאתר מיקום...';
+    this.locate();
   },
 
   buildMap(){
@@ -340,11 +382,14 @@ const App={
       locale:{'NavigationControl.ZoomIn':'','NavigationControl.ZoomOut':''}
     });
 
+    this.map.once('error',e=>{if(!this.ready){document.getElementById('splashStatus').textContent='המפה לא נטענה — בדוק חיבור';this.toast('⚠️ המפה לא נטענה — המיקום עדיין עובד');this.hideSplash()}});
     this.map.on('load',()=>{
       this.ready=true;
       const mb=(GL===window.mapboxgl&&USE_MAPBOX);
       /* תוויות בעברית בלבד (במקום לטינית + עברית) — רק במפה החינמית */
-      if(!mb)try{for(const l of this.map.getStyle().layers){if(l.type==='symbol'&&l.layout&&l.layout['text-field'])this.map.setLayoutProperty(l.id,'text-field',['coalesce',['get','name:he'],['get','name'],['get','name:latin']]);}}catch(e){console.warn('labels',e)}
+      if(!mb)try{for(const l of this.map.getStyle().layers){if(l.type!=='symbol'||!l.layout||!l.layout['text-field'])continue;if(/shield|ref/.test(l.id)||JSON.stringify(l.layout['text-field']).includes('"ref"'))continue;this.map.setLayoutProperty(l.id,'text-field',['coalesce',['get','name:he'],['get','name'],['get','name:latin']]);}}catch(e){console.warn('labels',e)}
+      /* ליטוש המראה של המפה החינמית: רקע חם, מים בהירים, ירוק רך — קרוב יותר למפות של אפל */
+      if(!mb)try{const P=(id,k,v)=>{if(this.map.getLayer(id))this.map.setPaintProperty(id,k,v)};P('background','background-color','#f5f4f0');P('water','fill-color','#b7d7f2');P('park','fill-color','#cfe6c4');P('landcover_grass','fill-color','#dbebcf');P('landcover_wood','fill-color','#c9dfbd');P('landuse_residential','fill-color','#efeee9');}catch(e){}
       if(mb){
         // Mapbox: בניינים בתלת־ממד ותנועה חיה — כמו במקור
         const layers=this.map.getStyle().layers;let labelLayerId;
@@ -368,8 +413,7 @@ const App={
       this.map.addSource('dr-trail',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[]}}});
       this.map.addLayer({id:'dr-trail-line',type:'line',source:'dr-trail',paint:{'line-color':'#af52de','line-width':3,'line-opacity':0.6,'line-dasharray':[2,2]}});
 
-      document.getElementById('splashStatus').textContent='מאתר מיקום...';
-      this.locate();
+      if(this.pos)this.render();
       // Check URL params for shared destination
       this._checkSharedLink();
     });
@@ -427,6 +471,7 @@ const App={
   },
 
   locate(){
+    this._wantCenter=true;
     if(!navigator.geolocation){this.toast('⚠️ הדפדפן לא תומך במיקום');this.hideSplash();return}
     navigator.geolocation.getCurrentPosition(p=>this.onPos(p),()=>{
       navigator.geolocation.getCurrentPosition(p=>this.onPos(p),()=>{this.hideSplash();this.toast('⚠️ לא ניתן לאתר מיקום');this.setSource('אין מיקום','none')},
@@ -487,7 +532,8 @@ const App={
     this.pos={lat,lng,acc,spd,hdg,alt,src,t:now};this.lastGPSTime=now;
     this.hist.push({...this.pos});if(this.hist.length>120)this.hist.shift();
     if(this.drMode){this.deactivateDR();this.toast('✅ GPS חזר — מיקום מדויק')}
-    DR.setAnchor(lat,lng);this.render();this.hideSplash();
+    DR.setAnchor(lat,lng);this.render();this.hideSplash();this._updateSosPos();
+    if(this.dest&&this._routedDest!==this.dest)this.fetchRoute();
   },
 
   showSpoof(reasons,sev){document.getElementById('spoofAlert').classList.add('active');document.getElementById('spoofReasons').textContent=reasons.join(' · ');document.getElementById('spoofDetail').textContent=(sev==='high'?'🔴 חומרה גבוהה':sev==='medium'?'🟠 בינונית':'🟡 חשד')+' — משתמש במיקום אחרון אמין'},
@@ -499,13 +545,15 @@ const App={
     if(!this.pos||!this.ready)return;
     const{lat,lng,acc,spd,hdg,alt,src}=this.pos;
     this.marker.setLngLat([lng,lat]).addTo(this.map);
-    if(!this.firstFix){this.firstFix=true;this.map.flyTo({center:[lng,lat],zoom:acc<80?16:acc<400?14:12,duration:1500,pitch:acc<80?45:0})}
+    const z=acc<80?16:acc<400?14:12;
+    const upgrade=this._flyT&&(Date.now()-this._flyT)<10000&&z>this._flyZoom;
+    if(!this.firstFix||this._wantCenter||upgrade){this.firstFix=true;this._wantCenter=false;this._flyZoom=z;this._flyT=Date.now();this.map.flyTo({center:[lng,lat],zoom:z,duration:1500,pitch:acc<80?45:0})}
     this.setSource(src.n+' פעיל',src.c);
     document.getElementById('accChip').textContent=`±${Math.round(acc)}m`;
     const ms=document.getElementById('mSrc');ms.textContent=src.n;ms.style.color=src.clr==='green'?'var(--green)':src.clr==='orange'?'var(--orange)':'var(--red)';
     const ma=document.getElementById('mAcc');ma.textContent=Math.round(acc);ma.style.color=acc<50?'var(--green)':acc<200?'var(--orange)':'var(--red)';
     if(spd!==null&&spd>=0)document.getElementById('mSpd').textContent=Math.round(spd*3.6);
-    const h=hdg!==null?hdg:this.heading;if(h!==null)document.getElementById('mHdg').textContent=this.heb(h);
+    const h=Number.isFinite(hdg)?hdg:this.heading;if(h!==null&&Number.isFinite(h))document.getElementById('mHdg').textContent=this.heb(h);
     if(alt!==null)document.getElementById('mAlt').textContent=Math.round(alt);
     document.getElementById('mSteps').textContent=DR.steps;
     if(this.dest)this.updateNavInfo();
@@ -533,99 +581,121 @@ const App={
 
   /* ═══ חיפוש כתובת (Nominatim / OpenStreetMap) ═══ */
   async search(q){
-    if(!q||q.length<2){document.getElementById('resultsList').classList.remove('open');return}
-    if(USE_MAPBOX){
-      try{
-        const r=await(await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=il&language=he&limit=5`)).json();
-        const c=document.getElementById('resultsList');c.innerHTML='';
-        if(!r.features||!r.features.length){c.innerHTML='<div class="result-row"><div class="result-text"><div class="result-name">לא נמצאו תוצאות</div></div></div>';c.classList.add('open');return}
-        r.features.forEach(f=>{const nm=f.text||f.place_name.split(',')[0];const ad=f.place_name.split(',').slice(1,3).join(', ');
-          const d=document.createElement('div');d.className='result-row';
-          d.innerHTML=`<div class="result-icon">📍</div><div class="result-text"><div class="result-name">${nm}</div><div class="result-addr">${ad}</div></div>`;
-          d.onclick=()=>{this.setDest(f.center[1],f.center[0],nm);c.classList.remove('open');document.getElementById('searchInput').value=nm};c.appendChild(d);});
-        c.classList.add('open');
-      }catch(e){this.toast('⚠️ שגיאה בחיפוש')}
-      return;
-    }
+    q=(q||'').trim();
+    const c=document.getElementById('resultsList');
+    if(this._sc)this._sc.abort('new');
+    if(q.length<2){c.classList.remove('open');return}
+    const ac=this._sc=new AbortController();
+    const row=(nm,ad,onclick)=>{const d=document.createElement('div');d.className='result-row';const ic=document.createElement('div');ic.className='result-icon';ic.textContent='📍';const tx=document.createElement('div');tx.className='result-text';const a1=document.createElement('div');a1.className='result-name';a1.textContent=nm;const a2=document.createElement('div');a2.className='result-addr';a2.textContent=ad;tx.append(a1,a2);d.append(ic,tx);if(onclick)d.onclick=onclick;return d};
+    const none=()=>{c.innerHTML='';const d=document.createElement('div');d.className='result-row';const tx=document.createElement('div');tx.className='result-text';const a1=document.createElement('div');a1.className='result-name';a1.textContent='לא נמצאו תוצאות';tx.appendChild(a1);d.appendChild(tx);c.appendChild(d);c.classList.add('open')};
     try{
-      const r=await(await fetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=jsonv2&countrycodes=il&accept-language=he&limit=5`)).json();
-      const c=document.getElementById('resultsList');c.innerHTML='';
-      if(!Array.isArray(r)||!r.length){c.innerHTML='<div class="result-row"><div class="result-text"><div class="result-name">לא נמצאו תוצאות</div></div></div>';c.classList.add('open');return}
-      r.forEach(f=>{
-        const parts=(f.display_name||'').split(',').map(s=>s.trim());
-        const nm=f.name||parts[0];
-        const ad=parts.slice(1,3).join(', ');
-        const d=document.createElement('div');d.className='result-row';
-        d.innerHTML=`<div class="result-icon">📍</div><div class="result-text"><div class="result-name">${nm}</div><div class="result-addr">${ad}</div></div>`;
-        d.onclick=()=>{this.setDest(+f.lat,+f.lon,nm);c.classList.remove('open');document.getElementById('searchInput').value=nm};
-        c.appendChild(d);
-      });c.classList.add('open');
-    }catch(e){this.toast('⚠️ שגיאה בחיפוש')}
+      let items=[];
+      if(USE_MAPBOX){
+        const r=await(await timedFetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=il&language=he&limit=5`,8000,ac)).json();
+        items=(r.features||[]).map(f=>({nm:f.text||f.place_name.split(',')[0],ad:f.place_name.split(',').slice(1,3).join(', '),lat:f.center[1],lng:f.center[0]}));
+      }else{
+        const res=await timedFetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=jsonv2&countrycodes=il&accept-language=he&limit=5`,8000,ac);
+        if(res.status===429||res.status>=500){this.toast('שירות החיפוש עמוס — נסה שוב בעוד רגע');return}
+        const r=await res.json();
+        items=(Array.isArray(r)?r:[]).map(f=>{const parts=(f.display_name||'').split(',').map(s=>s.trim());return{nm:f.name||parts[0],ad:parts.slice(1,3).join(', '),lat:+f.lat,lng:+f.lon}});
+      }
+      if(ac!==this._sc)return;
+      c.innerHTML='';
+      if(!items.length){none();return}
+      items.forEach(it=>{const nm=cleanName(it.nm);c.appendChild(row(nm,cleanName(it.ad),()=>{this.setDest(it.lat,it.lng,nm);c.classList.remove('open');document.getElementById('searchInput').value=nm}))});
+      c.classList.add('open');
+    }catch(e){
+      if(ac!==this._sc)return;
+      this.toast(ac.signal.reason==='timeout'?'⚠️ החיפוש לא ענה — בדוק חיבור':'⚠️ שגיאה בחיפוש');
+    }
   },
 
   /* ═══ מסלול (OSRM לנסיעה · Valhalla להליכה) ═══ */
   async setDest(lat,lng,name){
+    name=cleanName(name)||`${lat.toFixed(4)}, ${lng.toFixed(4)}`;
     this.dest={lat,lng,name};
-    // Dest marker
+    // Dest marker — הטקסט נכנס כ־textContent, לא כ־HTML
     if(this._destMarker)this._destMarker.remove();
     const el=document.createElement('div');
-    el.innerHTML=`<div style="background:#007aff;color:white;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.2);border:2px solid white">${name}</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #007aff;margin:0 auto"></div>`;
-    this._destMarker=new GL.Marker({element:el,anchor:'bottom'}).setLngLat([lng,lat]).addTo(this.map);
+    const lab=document.createElement('div');lab.style.cssText='background:#007aff;color:white;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.2);border:2px solid white';lab.textContent=name;
+    const pin=document.createElement('div');pin.style.cssText='width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:12px solid #007aff;margin:0 auto';
+    el.append(lab,pin);
+    if(this.map)this._destMarker=new GL.Marker({element:el,anchor:'bottom'}).setLngLat([lng,lat]).addTo(this.map);
 
     document.getElementById('navPanel').classList.add('active');
     document.getElementById('navLabel').textContent='ניווט ל: '+name;
+    document.getElementById('navDistance').textContent='—';document.getElementById('navTime').textContent='';
+    // פתיחה באפליקציות ניווט אחרות
+    const oi=document.getElementById('openIn');oi.innerHTML='';
+    [['Waze',`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`],['Google Maps',`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`],['Apple Maps',`https://maps.apple.com/?daddr=${lat},${lng}`]].forEach(([l,u])=>{const a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener';a.textContent=l;oi.appendChild(a)});
     await this.fetchRoute();
   },
 
   async fetchRoute(){
     if(!this.pos||!this.dest)return;
-    const walking=this.routeMode==='walking';
+    const dest=this.dest, walking=this.routeMode==='walking';
+    this._routedDest=dest; this._routeReq=(this._routeReq||0)+1; const req=this._routeReq;
+    if(this._routeAC)this._routeAC.abort('new');
+    const ac=this._routeAC=new AbortController();
+    const stale=()=>req!==this._routeReq;
+    const from={lat:this.pos.lat,lng:this.pos.lng,t:Date.now()};
     try{
       let route=null;
       if(USE_MAPBOX){
-        const url=`https://api.mapbox.com/directions/v5/mapbox/${this.routeMode}/${this.pos.lng},${this.pos.lat};${this.dest.lng},${this.dest.lat}?geometries=geojson&overview=full&language=he&access_token=${MAPBOX_TOKEN}`;
-        const r=await(await fetch(url)).json();
+        const r=await(await timedFetch(`https://api.mapbox.com/directions/v5/mapbox/${this.routeMode}/${from.lng},${from.lat};${dest.lng},${dest.lat}?geometries=geojson&overview=full&language=he&access_token=${MAPBOX_TOKEN}`,8000,ac)).json();
+        if(stale())return;
         if(!r.routes||!r.routes.length){this.toast('לא נמצא מסלול');return}
         route=r.routes[0];
       }
       if(!route&&walking){
         /* Valhalla: מסלול הולכי רגל אמיתי (שבילים, מדרכות) */
         try{
-          const q={locations:[{lat:this.pos.lat,lon:this.pos.lng},{lat:this.dest.lat,lon:this.dest.lng}],costing:'pedestrian',units:'kilometers'};
-          const v=await(await fetch(VALHALLA+'?json='+encodeURIComponent(JSON.stringify(q)))).json();
+          const q={locations:[{lat:from.lat,lon:from.lng},{lat:dest.lat,lon:dest.lng}],costing:'pedestrian',units:'kilometers'};
+          const v=await(await timedFetch(VALHALLA+'?json='+encodeURIComponent(JSON.stringify(q)),8000,ac)).json();
+          if(stale())return;
           if(v.trip&&v.trip.legs&&v.trip.legs.length){
             const coords=v.trip.legs.flatMap(l=>decodePoly6(l.shape));
             route={distance:v.trip.summary.length*1000,duration:v.trip.summary.time,geometry:{type:'LineString',coordinates:coords}};
           }
-        }catch(e){console.warn('Valhalla',e)}
+        }catch(e){if(ac.signal.aborted&&ac.signal.reason==='new')return;console.warn('Valhalla',e)}
       }
       if(!route){
         /* OSRM: מסלול נסיעה. בהליכה — אותו קו, והזמן לפי 5 קמ״ש */
-        const r=await(await fetch(`${OSRM}${this.pos.lng},${this.pos.lat};${this.dest.lng},${this.dest.lat}?geometries=geojson&overview=full`)).json();
+        const url=`${OSRM}${from.lng},${from.lat};${dest.lng},${dest.lat}?geometries=geojson&overview=full`;
+        let res=await timedFetch(url,8000,ac);
+        if(stale())return;
+        if(res.status===429||res.status>=500){this.toast('שירות הניווט עמוס — מנסה שוב');await new Promise(r=>setTimeout(r,1500));if(stale())return;res=await timedFetch(url,8000,ac);if(stale())return;if(res.status===429||res.status>=500){this.toast('שירות הניווט אינו זמין כרגע, נסה שוב בעוד רגע');return}}
+        let r=null;try{r=await res.json()}catch(e){this.toast('שירות הניווט אינו זמין כרגע, נסה שוב בעוד רגע');return}
+        if(stale())return;
         if(!r.routes||!r.routes.length){this.toast('לא נמצא מסלול');return}
         route=r.routes[0];
         if(walking)route.duration=route.distance/1.39;
       }
+      if(stale())return;
+      this._routeFrom=from;
       // Draw route
-      if(this.map.getSource('route')){
+      if(this.map&&this.map.getSource('route')){
         this.map.getSource('route').setData({type:'Feature',geometry:route.geometry});
       }
-      // Fit bounds
+      // Fit bounds — הריפוד לפי הגובה האמיתי של הלוח התחתון ושדה החיפוש
       const coords=route.geometry.coordinates;
-      const bounds=coords.reduce((b,c)=>b.extend(c),new GL.LngLatBounds(coords[0],coords[0]));
-      this.map.fitBounds(bounds,{padding:{top:120,bottom:280,left:60,right:60},duration:1000});
-
+      if(this.map&&coords.length){
+        const bounds=coords.reduce((b,c)=>b.extend(c),new GL.LngLatBounds(coords[0],coords[0]));
+        const sh=document.querySelector('.sheet'),sa=document.getElementById('searchArea');
+        let bottom=sh?Math.max(0,innerHeight-sh.getBoundingClientRect().top)+12:280, top=sa?sa.getBoundingClientRect().bottom+12:120;
+        if(top+bottom>innerHeight*0.8){bottom=Math.max(60,innerHeight*0.8-top)}
+        this.map.fitBounds(bounds,{padding:{top,bottom,left:40,right:40},duration:1000});
+      }
       // Update nav info
-      const dist=route.distance;
-      const dur=route.duration;
+      const dist=route.distance, dur=route.duration;
       document.getElementById('navDistance').textContent=dist<1000?Math.round(dist)+' מטר':(dist/1000).toFixed(1)+' ק״מ';
       const mins=Math.round(dur/60);
-      document.getElementById('navTime').textContent=mins<60?mins+' דקות':Math.floor(mins/60)+' שע׳ '+mins%60+' דק׳';
-      const b=this.bear(this.pos.lat,this.pos.lng,this.dest.lat,this.dest.lng);
-      document.getElementById('navBearing').textContent='כיוון: '+this.heb(b)+' · '+Math.round(b)+'°';
+      document.getElementById('navTime').textContent=(mins<60?mins+' דקות':Math.floor(mins/60)+' שע׳ '+mins%60+' דק׳')+(walking?' הליכה':' נסיעה');
+      this.updateNavInfo();
     }catch(e){
+      if(stale()||(ac.signal.aborted&&ac.signal.reason==='new'))return;
       console.error('Route error:',e);
-      this.toast('⚠️ שגיאה בחישוב מסלול');
+      this.toast(ac.signal.aborted?'⚠️ שירות הניווט לא ענה — בדוק חיבור':'⚠️ שגיאה בחישוב מסלול');
     }
   },
 
@@ -633,8 +703,11 @@ const App={
     if(!this.pos||!this.dest)return;
     const d=this.dist(this.pos.lat,this.pos.lng,this.dest.lat,this.dest.lng);
     const b=this.bear(this.pos.lat,this.pos.lng,this.dest.lat,this.dest.lng);
-    document.getElementById('navDistance').textContent=d<1000?Math.round(d)+' מטר':(d/1000).toFixed(1)+' ק״מ';
-    document.getElementById('navBearing').textContent='כיוון: '+this.heb(b)+' · '+Math.round(b)+'°';
+    const ds=d<1000?Math.round(d)+' מטר':(d/1000).toFixed(1)+' ק״מ';
+    if(this._routedDest!==this.dest||!this._routeFrom)document.getElementById('navDistance').textContent=ds;
+    document.getElementById('navBearing').textContent='כיוון: '+this.heb(b)+' · '+Math.round(b)+'° · '+ds+' בקו אווירי';
+    // זזנו יותר מ־100 מ׳ מנקודת חישוב המסלול — מחשבים מחדש (לא יותר מפעם ב־10 שנ׳)
+    if(this._routeFrom&&this.dist(this.pos.lat,this.pos.lng,this._routeFrom.lat,this._routeFrom.lng)>100&&Date.now()-this._routeFrom.t>10000){this._routeFrom.t=Date.now();this.fetchRoute()}
   },
 
   clearNav(){
@@ -644,6 +717,7 @@ const App={
     document.getElementById('navPanel').classList.remove('active');
     document.getElementById('searchInput').value='';
     document.getElementById('navTime').textContent='';
+    this._routedDest=null;this._routeFrom=null;if(this._routeAC)this._routeAC.abort('new');
   },
 
   dist(a,b,c,d){const R=6371000,p=Math.PI/180,dl=(c-a)*p,dn=(d-b)*p,x=Math.sin(dl/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(dn/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))},
@@ -662,6 +736,22 @@ const App={
     this.toast(this._trafficVisible?'🚦 תנועה חיה — פעיל':'🚦 תנועה חיה — כבוי');
   },
 
+  _updateSosPos(){
+    const el=document.getElementById('sosPos');if(!el)return;
+    if(!this.pos){el.textContent='מאתר מיקום…';return}
+    const{lat,lng,acc,src}=this.pos;
+    el.innerHTML='';const b=document.createElement('b');b.textContent=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;el.appendChild(b);
+    el.appendChild(document.createTextNode(` · דיוק ±${Math.round(acc)} מ׳ · ${src.n}`));
+  },
+  async shareMyLocation(){
+    if(!this.pos){this.toast('⚠️ אין עדיין מיקום — נסה שוב בעוד רגע');this.locate();return}
+    const{lat,lng,acc}=this.pos;
+    const gm=`https://www.google.com/maps?q=${lat.toFixed(6)},${lng.toFixed(6)}`;
+    const text=`🆘 המיקום שלי: ${lat.toFixed(5)}, ${lng.toFixed(5)} (דיוק ±${Math.round(acc)} מ׳)\n${gm}`;
+    try{ if(navigator.share){await navigator.share({title:'המיקום שלי',text,url:gm});return} }catch(e){if(e&&e.name==='AbortError')return}
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
+  },
+
   shareWhatsApp(){
     if(!this.dest){this.toast('⚠️ בחר יעד לפני שיתוף');return}
     const baseUrl=window.location.origin+window.location.pathname;
@@ -676,9 +766,9 @@ const App={
     const name=params.get('name');
     if(dest){
       const[lat,lng]=dest.split(',').map(Number);
-      if(!isNaN(lat)&&!isNaN(lng)){
-        const label=name?decodeURIComponent(name):'יעד משותף';
-        setTimeout(()=>this.setDest(lat,lng,label),2000);
+      if(Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180){
+        const label=cleanName(name)||'יעד משותף';
+        this.setDest(lat,lng,label);  // בלי מיקום עדיין — המסלול יחושב ברגע שיגיע
         document.getElementById('searchInput').value=label;
       }
     }
@@ -703,14 +793,18 @@ const App={
     document.getElementById('recenterBtn').onclick=()=>this.recenter();
     document.getElementById('trafficBtn').onclick=()=>this.toggleTraffic();
     document.getElementById('navDismiss').onclick=()=>this.clearNav();
+    // חירום
+    document.getElementById('sosBtn').onclick=()=>{document.getElementById('sos').classList.add('active');this._updateSosPos();if(!this.pos)this.locate()};
+    document.getElementById('sosClose').onclick=()=>document.getElementById('sos').classList.remove('active');
+    document.getElementById('sosShare').onclick=()=>this.shareMyLocation();
     // Map long-press / click to set destination
-    this.map.on('click',(e)=>{
+    if(this.map)this.map.on('click',(e)=>{
       // Ignore if clicking on controls area
       if(e.originalEvent.target.closest('.sheet,.topbar,.search-area,.side-controls,.spoof-alert,.dr-banner'))return;
       const{lng,lat}=e.lngLat;
       // Reverse geocode to get address
       const rev=USE_MAPBOX?`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=he&limit=1`:`${NOMINATIM}/reverse?lat=${lat}&lon=${lng}&format=jsonv2&accept-language=he&zoom=17`;
-      fetch(rev)
+      timedFetch(rev,8000)
         .then(r=>r.json()).then(data=>{
           const name=USE_MAPBOX?(data.features&&data.features.length?(data.features[0].text||data.features[0].place_name.split(',')[0]):`${lat.toFixed(4)}, ${lng.toFixed(4)}`):(data&&(data.name||(data.display_name||'').split(',')[0].trim())||`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
           this.setDest(lat,lng,name);
@@ -729,7 +823,11 @@ const App={
       };
     });
     const si=document.getElementById('searchInput');
-    si.oninput=e=>{clearTimeout(this.sTmr);this.sTmr=setTimeout(()=>this.search(e.target.value),350)};
+    // חיפוש רק באישור (Enter / כפתור) — לא על כל הקשה: כך דורשת מדיניות השימוש של Nominatim
+    si.oninput=e=>{if(!e.target.value.trim()){if(this._sc)this._sc.abort('new');document.getElementById('resultsList').classList.remove('open')}};
+    si.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();this.search(si.value)}};
+    si.onsearch=()=>this.search(si.value);
+    document.getElementById('searchGo').onclick=()=>this.search(si.value);
     document.addEventListener('click',e=>{if(!e.target.closest('.search-area'))document.getElementById('resultsList').classList.remove('open')});
   }
 };
