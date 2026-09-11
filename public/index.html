@@ -690,9 +690,16 @@ const App={
     const goMotion=()=>window.addEventListener('devicemotion',e=>{
       if(e.accelerationIncludingGravity){const{x,y,z}=e.accelerationIncludingGravity;DR.processAccel(x||0,y||0,z||0);Spoof.processMotion(x||0,y||0,z||0);if(DR.active&&DR.estimated)this.renderDR()}
     },true);
-    if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-      document.addEventListener('click',()=>{DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted')goOri()}).catch(()=>{});DeviceMotionEvent.requestPermission().then(s=>{if(s==='granted')goMotion()}).catch(()=>{})},{once:true});
-    }else{goOri();goMotion()}
+    /* באייפון חובה לבקש הרשאת חיישנים מתוך לחיצה — אבל לא בלחיצה הראשונה על כל דבר
+       (זה גזל את המקלדת משדה החיפוש). מבקשים רק כשצריך: מעקב, ניווט, מצפן. */
+    this._askMotion=()=>{
+      if(this._motionAsked)return;this._motionAsked=true;
+      if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+        DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted')goOri()}).catch(()=>{});
+        if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function')DeviceMotionEvent.requestPermission().then(s=>{if(s==='granted')goMotion()}).catch(()=>{});
+      }else{goOri();goMotion()}
+    };
+    if(!(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'))this._askMotion();  // אנדרואיד/מחשב: בלי דיאלוג
   },
 
   locate(){
@@ -707,6 +714,7 @@ const App={
 
   startTrack(){
     if(this.tracking){this.stopTrack();return}
+    if(this._askMotion)this._askMotion();
     this.tracking=true;
     const b=document.getElementById('btnTrack');b.classList.add('live');document.getElementById('btnTrackT').textContent='עצור מעקב';
     this.wId=navigator.geolocation.watchPosition(p=>this.onPos(p),()=>{if(!this.drMode&&this.pos)this.activateDR()},{enableHighAccuracy:true,timeout:8000,maximumAge:2000});
@@ -1059,6 +1067,7 @@ const App={
   async startNav(){
     if(!this.dest){this.toast('⚠️ בחר יעד');return}
     if(!this.pos){this.toast('⚠️ אין עדיין מיקום');this.locate();return}
+    if(this._askMotion)this._askMotion();
     this._nav=true;this._stepIdx=0;this._spokenIdx=-1;
     document.getElementById('turn').classList.add('active');document.getElementById('searchArea').classList.add('navhide');document.body.classList.add('navon');
     document.getElementById('btnNavT').textContent='עצור ניווט';
@@ -1242,6 +1251,7 @@ const App={
     document.querySelectorAll('#ssheet [data-open]').forEach(r=>r.onclick=()=>{closeSS();const o=(this._openIn||[])[+r.dataset.open];if(o)window.open(o[1],'_blank','noopener')});
     document.addEventListener('click',e=>{if(ss.classList.contains('active')&&!e.target.closest('#ssheet,#btnShare,#btnShare2'))closeSS()});
     document.getElementById('compassBtn').onclick=()=>{
+      if(this._askMotion)this._askMotion();
       this._followHeading=!this._followHeading;
       const btn=document.getElementById('compassBtn');
       if(this._followHeading){
