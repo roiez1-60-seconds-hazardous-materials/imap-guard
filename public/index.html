@@ -87,6 +87,13 @@
 .sw input:checked+i::after{transform:translateX(20px)}
 .sw input:disabled+i{opacity:.4}
 .lnote{font-size:11.5px;color:var(--text3);line-height:1.5;margin-top:10px}
+.srow{padding:13px 4px;border-top:0.5px solid var(--sep);font-size:16px;font-weight:600;color:var(--text);cursor:pointer}
+.srow:active{background:var(--blue-light)}
+/* התראת נסיעה — מתחת לכרטיס הפנייה, לא על המפה כולה */
+.alert{position:fixed;left:14px;right:14px;top:calc(var(--under-top) + var(--banners-h,0px) + var(--turn-h,84px) + 8px);z-index:1003;display:none;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:#ffcc00;color:#1c1c1e;font-weight:700;font-size:15px;box-shadow:var(--shadow-md)}
+.alert.active{display:flex}
+.alert.red{background:#ff3b30;color:#fff}
+.alert .ico{width:24px;height:24px}
 .radar-credit{position:fixed;right:14px;left:14px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:30px;line-height:18px;bottom:calc(var(--sheet-h,300px) + 8px);z-index:998;pointer-events:none;background:rgba(28,28,30,0.82);color:#fff;font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:10px;display:none;max-width:70vw;line-height:1.35}
 .radar-credit.active{display:block}
 #radarImg{position:absolute;pointer-events:none;opacity:.62;mix-blend-mode:multiply;z-index:2;display:none;image-rendering:auto}
@@ -350,6 +357,7 @@ body.radar-on{--stack-h:46px}
 </div>
 </div>
 
+<div class="alert" id="alert" role="status"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4M12 17h.01"/></svg><span id="alertText"></span></div>
 <div class="turn" id="turn"><div class="turn-arrow" id="turnArrow">↑</div><div class="turn-main"><div class="turn-dist" id="turnDist">—</div><div class="turn-text" id="turnText"></div></div><button class="turn-stop" id="turnStop">סיום</button></div>
 <div class="offline-pill" id="offlinePill">אין חיבור — מוצג המידע האחרון</div>
 
@@ -373,6 +381,13 @@ body.radar-on{--stack-h:46px}
 </div>
 <img id="radarImg" alt="">
 <div class="radar-credit" id="radarCredit">מכ״ם גשם: השירות המטאורולוגי הישראלי · השירות אינו אחראי למידע</div>
+<div class="lsheet" id="ssheet" role="dialog" aria-label="שיתוף ופתיחה">
+  <div class="lsheet-head"><h3>שיתוף היעד</h3><button class="nav-dismiss" id="ssheetClose" aria-label="סגור"><svg class="ico" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  <div class="srow" id="srowWa">שלח בוואטסאפ</div>
+  <div class="srow" id="srowCopy">העתק קישור</div>
+  <div class="lnote" style="margin:12px 0 4px">פתח את היעד באפליקציה אחרת</div>
+  <div class="srow" data-open="0">Waze</div><div class="srow" data-open="1">Google Maps</div><div class="srow" data-open="2">Apple Maps</div>
+</div>
 <div class="lsheet" id="lsheet" role="dialog" aria-label="שכבות">
   <div class="lsheet-head"><h3>שכבות</h3><button class="nav-dismiss" id="lsheetClose" aria-label="סגור"><svg class="ico" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
   <div class="seg" id="baseSeg"><button data-base="map" class="on">מפה</button><button data-base="sat">תצ״א</button></div>
@@ -402,7 +417,6 @@ body.radar-on{--stack-h:46px}
         <button class="nav-dismiss" id="navDismiss" aria-label="סגור"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       </div>
       <div class="seg" id="altSeg" style="display:none;margin-top:8px;font-size:12.5px"></div>
-      <div class="open-in" id="openIn"></div>
       <button class="btn-nav" id="btnNav"><span class="ico" style="display:inline-block;vertical-align:-5px;margin-inline-end:6px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 19.5 21 12 17l-7.5 4z"/></svg></span><span id="btnNavT">התחל ניווט</span></button>
     </div>
   </div>
@@ -452,9 +466,9 @@ const MAP_STYLE='https://tiles.openfreemap.org/styles/liberty';
 const NOMINATIM='https://nominatim.openstreetmap.org';
 const OSRM='https://router.project-osrm.org/route/v1/driving/';
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
-const OVERPASS='https://overpass-api.de/api/interpreter', OVERPASS2='https://overpass.kumi.systems/api/interpreter';
+const OVERPASS_LIST=['https://overpass-api.de/api/interpreter','https://maps.mail.ru/osm/tools/overpass/api/interpreter','https://overpass.private.coffee/api/interpreter'];
 /* Overpass: בקשת GET פשוטה (בלי preflight); אם השרת הראשי עמוס — מראה שנייה */
-async function overpass(q,ms){for(const base of [OVERPASS,OVERPASS2]){const ac=new AbortController();const tm=setTimeout(()=>ac.abort('timeout'),ms||20000);try{const res=await fetch(base+'?data='+encodeURIComponent(q),{signal:ac.signal});clearTimeout(tm);if(res.status===429||res.status>=500)continue;return await res.json()}catch(e){clearTimeout(tm)}}throw new Error('overpass')}
+async function overpass(q,ms){for(const base of OVERPASS_LIST){const ac=new AbortController();const tm=setTimeout(()=>ac.abort('timeout'),ms||20000);try{const res=await fetch(base+'?data='+encodeURIComponent(q),{signal:ac.signal});clearTimeout(tm);if(res.status===429||res.status>=500)continue;return await res.json()}catch(e){clearTimeout(tm)}}throw new Error('overpass')}
 const STYLE_LIGHT_FREE='https://tiles.openfreemap.org/styles/liberty', STYLE_DARK_FREE='https://tiles.openfreemap.org/styles/dark';
 const STYLE_LIGHT_MB='mapbox://styles/mapbox/streets-v12', STYLE_DARK_MB='mapbox://styles/mapbox/dark-v11';
 const THEME_KEY='ig-theme';
@@ -826,9 +840,7 @@ const App={
     try{document.getElementById('searchInput').blur()}catch(e){}document.getElementById('searchArea').classList.remove('focus');document.body.classList.remove('searching');document.getElementById('resultsList').classList.remove('open');
     document.getElementById('navLabel').textContent='ניווט ל: '+(full&&full!==name?full:name);
     document.getElementById('navDistance').textContent='—';document.getElementById('navTime').textContent='';
-    // פתיחה באפליקציות ניווט אחרות
-    const oi=document.getElementById('openIn');oi.innerHTML='';const ol=document.createElement('span');ol.textContent='פתח ב:';oi.appendChild(ol);
-    [['Waze',`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`],['Google Maps',`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`],['Apple Maps',`https://maps.apple.com/?daddr=${lat},${lng}`]].forEach(([l,u])=>{const a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener';a.textContent=l;oi.appendChild(a)});
+    this._openIn=[['Waze',`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`],['Google Maps',`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`],['Apple Maps',`https://maps.apple.com/?daddr=${lat},${lng}`]];
     await this.fetchRoute();
   },
 
@@ -984,13 +996,14 @@ const App={
       if(this._cams.length)this.toast(`${this._cams.length} מצלמות מהירות על המסלול — תקבל התראה 300 מ׳ לפני`);
     }catch(e){}
   },
+  showAlert(msg,red){const a=document.getElementById('alert');document.getElementById('alertText').textContent=msg;a.classList.toggle('red',!!red);a.classList.add('active');clearTimeout(this._alT);this._alT=setTimeout(()=>a.classList.remove('active'),7000);this._say(msg);try{navigator.vibrate&&navigator.vibrate(red?[150,80,150]:[120,60,120])}catch(e){}},
   _checkAlerts(){
     if(!this._nav||!this.pos||!this._routeGeo)return;
     const c=this._routeGeo.coordinates;
     let best=1e9,me=0;for(let i=0;i<c.length;i++){const d=this.dist(this.pos.lat,this.pos.lng,c[i][1],c[i][0]);if(d<best){best=d;me=i}}
     const ahead=(idx)=>{let m=0;for(let i=me;i<idx&&i<c.length-1;i++)m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);return m};
-    for(const cam of (this._cams||[])){if(cam.warned||cam.idx<me)continue;const d=ahead(cam.idx);if(d<=320){cam.warned=true;const msg='מצלמת מהירות בעוד '+Math.round(d/10)*10+' מ׳'+(cam.maxspeed?' · מותר '+cam.maxspeed:'');this.toast(msg);this._say(msg);try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}}}
-    const cong=this._cong||[];if(cong.length){let m=0;for(let i=me;i<c.length-1&&m<1000;i++){m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);const v=cong[i];if((v==='heavy'||v==='severe')&&(this._jamWarnIdx==null||i>this._jamWarnIdx+20)){this._jamWarnIdx=i;const msg=(v==='severe'?'פקק כבד':'עומס תנועה')+' בעוד '+Math.round(m/50)*50+' מ׳';this.toast(msg);this._say(msg);break}}}
+    for(const cam of (this._cams||[])){if(cam.warned||cam.idx<me)continue;const d=ahead(cam.idx);if(d<=320){cam.warned=true;const msg='מצלמת מהירות בעוד '+Math.round(d/10)*10+' מ׳'+(cam.maxspeed?' · מותר '+cam.maxspeed:'');this.showAlert(msg,false)}}
+    const cong=this._cong||[];if(cong.length){let m=0;for(let i=me;i<c.length-1&&m<1000;i++){m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);const v=cong[i];if((v==='heavy'||v==='severe')&&(this._jamWarnIdx==null||i>this._jamWarnIdx+20)){this._jamWarnIdx=i;const msg=(v==='severe'?'פקק כבד':'עומס תנועה')+' בעוד '+Math.round(m/50)*50+' מ׳';this.showAlert(msg,v==='severe');break}}}
   },
   _say(txt){try{if(!('speechSynthesis'in window))return;const u=new SpeechSynthesisUtterance(txt);u.lang='he-IL';const v=speechSynthesis.getVoices().find(v=>/^he/i.test(v.lang));if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},
   async startNav(){
@@ -1007,7 +1020,7 @@ const App={
   },
   stopNav(){
     this._nav=false;
-    document.getElementById('turn').classList.remove('active');document.getElementById('searchArea').classList.remove('navhide');document.body.classList.remove('navon');
+    document.getElementById('turn').classList.remove('active');document.getElementById('alert').classList.remove('active');document.getElementById('searchArea').classList.remove('navhide');document.body.classList.remove('navon');
     document.getElementById('btnNavT').textContent='התחל ניווט';
     try{if(this._wake){this._wake.release();this._wake=null}}catch(e){}
     try{speechSynthesis.cancel()}catch(e){}
@@ -1171,7 +1184,13 @@ const App={
   events(){
     document.getElementById('btnLocate').onclick=()=>this.locate();
     document.getElementById('btnTrack').onclick=()=>this.startTrack();
-    document.getElementById('btnShare').onclick=()=>this.shareWhatsApp();document.getElementById('btnShare2').onclick=()=>this.shareWhatsApp();
+    const ss=document.getElementById('ssheet');const openSS=()=>{if(!this.dest){this.toast('בחר יעד לפני שיתוף');return}ss.classList.add('active')};
+    document.getElementById('btnShare').onclick=openSS;document.getElementById('btnShare2').onclick=openSS;
+    document.getElementById('ssheetClose').onclick=()=>ss.classList.remove('active');
+    document.getElementById('srowWa').onclick=()=>{ss.classList.remove('active');this.shareWhatsApp()};
+    document.getElementById('srowCopy').onclick=async()=>{ss.classList.remove('active');const link=`${location.origin}${location.pathname}?dest=${this.dest.lat},${this.dest.lng}&name=${encodeURIComponent(this.dest.name)}`;try{await navigator.clipboard.writeText(link);this.toast('הקישור הועתק')}catch(e){prompt('',link)}};
+    document.querySelectorAll('#ssheet [data-open]').forEach(r=>r.onclick=()=>{ss.classList.remove('active');const o=(this._openIn||[])[+r.dataset.open];if(o)window.open(o[1],'_blank','noopener')});
+    document.addEventListener('click',e=>{if(ss.classList.contains('active')&&!e.target.closest('#ssheet,#btnShare,#btnShare2'))ss.classList.remove('active')});
     document.getElementById('compassBtn').onclick=()=>{
       this._followHeading=!this._followHeading;
       const btn=document.getElementById('compassBtn');
