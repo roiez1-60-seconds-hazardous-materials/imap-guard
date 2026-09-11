@@ -1322,7 +1322,7 @@ const App={
       // רק מצלמות שיושבות על המסלול (עד 40 מ׳ מהקו)
       const near=(la,lo)=>{let best=1e9,idx=-1;for(let i=0;i<c.length;i++){const d=this.dist(la,lo,c[i][1],c[i][0]);if(d<best){best=d;idx=i}}return{best,idx}};
       this._cams=(j.elements||[]).map(el=>{const q=near(el.lat,el.lon);return q.best<40?{lat:el.lat,lng:el.lon,idx:q.idx,maxspeed:(el.tags||{}).maxspeed,warned:false}:null}).filter(Boolean);
-      if(this._cams.length)this.toast(`${this._cams.length} מצלמות מהירות על המסלול — תקבל התראה 300 מ׳ לפני`);
+      if(this._cams.length)this.toast(`${this._cams.length} מצלמות מהירות על המסלול — תקבל התראה קילומטר לפני`);
     }catch(e){}
   },
   showAlert(msg,red){const a=document.getElementById('alert');document.getElementById('alertText').textContent=msg;a.classList.toggle('red',!!red);a.classList.add('active');clearTimeout(this._alT);this._alT=setTimeout(()=>a.classList.remove('active'),7000);this._say(msg);try{navigator.vibrate&&navigator.vibrate(red?[150,80,150]:[120,60,120])}catch(e){}},
@@ -1331,7 +1331,10 @@ const App={
     const c=this._routeGeo.coordinates;
     let best=1e9,me=0;for(let i=0;i<c.length;i++){const d=this.dist(this.pos.lat,this.pos.lng,c[i][1],c[i][0]);if(d<best){best=d;me=i}}
     const ahead=(idx)=>{let m=0;for(let i=me;i<idx&&i<c.length-1;i++)m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);return m};
-    for(const cam of (this._cams||[])){if(cam.warned||cam.idx<me)continue;const d=ahead(cam.idx);if(d<=320){cam.warned=true;const msg=(d<60?'מצלמת מהירות ממש לפניך':'מצלמת מהירות בעוד '+Math.round(d/10)*10+' מטר')+(cam.maxspeed?' · מותר '+cam.maxspeed:'');this.showAlert(msg,false)}}
+    /* מצלמת מהירות: התראה קילומטר לפני (רועי), ותזכורת קצרה 300 מ׳ לפני */
+    for(const cam of (this._cams||[])){if(cam.w2||cam.idx<me)continue;const d=ahead(cam.idx);const lim=cam.maxspeed?' · מותר '+cam.maxspeed:'';
+      if(!cam.w1&&d<=1050){cam.w1=true;this.showAlert((d>700?'מצלמת מהירות בעוד קילומטר':d<60?'מצלמת מהירות ממש לפניך':'מצלמת מהירות בעוד '+Math.round(d/50)*50+' מטר')+lim,false);if(d<=320)cam.w2=true}
+      else if(cam.w1&&d<=320){cam.w2=true;this.showAlert((d<60?'מצלמת מהירות ממש לפניך':'מצלמת מהירות בעוד '+Math.round(d/50)*50+' מטר')+lim,false)}}
     const j=this._jamInfo();
     if(j&&!j.inside&&j.ahead<=1000&&j.dur>=45&&!this._jamSaid){this._jamSaid=true;this.showAlert((j.sev?'פקק כבד':'עומס תנועה')+' בעוד '+Math.round(j.ahead/50)*50+' מטר · '+this._fmtD(j.dist)+' · כ־'+Math.max(1,Math.round(j.dur/60))+' דקות',j.sev)}
     if(!j)this._jamSaid=false;
