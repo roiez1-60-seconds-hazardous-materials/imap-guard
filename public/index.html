@@ -261,7 +261,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 /* ═══ מנוע המפה ═══
    מפתח מפבוקס ריק → המפה החינמית (MapLibre + OpenFreeMap + Nominatim + OSRM/Valhalla).
    מפתח מפבוקס מלא (pk.…) → Mapbox: סגנון Streets, תנועה חיה, חיפוש ומסלולים של מפבוקס — המראה המקורי. */
-const MAPBOX_TOKEN='';   // ← להדביק כאן מפתח ציבורי (pk.) מהחשבון במפבוקס
+const MAPBOX_TOKEN='__MAPBOX_TOKEN__';   // מוזרק בזמן הבנייה בוורסל ממשתנה הסביבה MAPBOX_TOKEN (מפתח ציבורי pk., מוגבל לכתובת האתר)
 const USE_MAPBOX=/^pk\./.test(MAPBOX_TOKEN);
 let GL=maplibregl;
 /* עברית בתוויות המפה: בלי התוסף הזה האותיות מצוירות הפוך */

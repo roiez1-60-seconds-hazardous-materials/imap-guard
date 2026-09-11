@@ -1,16 +1,22 @@
 {
-  "buildCommand": null,
+  "buildCommand": "sed -i \"s|__MAPBOX_TOKEN__|$MAPBOX_TOKEN|\" public/index.html && grep -c \"$MAPBOX_TOKEN\" public/index.html",
   "outputDirectory": "public",
   "framework": null,
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Content-Type", "value": "text/html; charset=utf-8" }
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/", "destination": "/index.html" }
+    {
+      "source": "/",
+      "destination": "/index.html"
+    }
   ]
 }
