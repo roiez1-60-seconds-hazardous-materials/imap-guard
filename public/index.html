@@ -401,7 +401,7 @@ body.radar-on{--stack-h:46px}
         <div class="nav-tools"><button class="nav-dismiss" id="btnShare2" aria-label="שיתוף יעד" title="שיתוף בוואטסאפ"><svg class="ico" style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></button>
         <button class="nav-dismiss" id="navDismiss" aria-label="סגור"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       </div>
-      <div class="seg" id="altSeg" style="display:none;margin-top:8px;font-size:12.5px"><button data-pref="fast" class="on">המהיר</button><button data-pref="short">הקצר</button></div>
+      <div class="seg" id="altSeg" style="display:none;margin-top:8px;font-size:12.5px"></div>
       <div class="open-in" id="openIn"></div>
       <button class="btn-nav" id="btnNav"><span class="ico" style="display:inline-block;vertical-align:-5px;margin-inline-end:6px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 19.5 21 12 17l-7.5 4z"/></svg></span><span id="btnNavT">התחל ניווט</span></button>
     </div>
@@ -452,7 +452,9 @@ const MAP_STYLE='https://tiles.openfreemap.org/styles/liberty';
 const NOMINATIM='https://nominatim.openstreetmap.org';
 const OSRM='https://router.project-osrm.org/route/v1/driving/';
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
-const OVERPASS='https://overpass-api.de/api/interpreter';
+const OVERPASS='https://overpass-api.de/api/interpreter', OVERPASS2='https://overpass.kumi.systems/api/interpreter';
+/* Overpass: בקשת GET פשוטה (בלי preflight); אם השרת הראשי עמוס — מראה שנייה */
+async function overpass(q,ms){for(const base of [OVERPASS,OVERPASS2]){const ac=new AbortController();const tm=setTimeout(()=>ac.abort('timeout'),ms||20000);try{const res=await fetch(base+'?data='+encodeURIComponent(q),{signal:ac.signal});clearTimeout(tm);if(res.status===429||res.status>=500)continue;return await res.json()}catch(e){clearTimeout(tm)}}throw new Error('overpass')}
 const STYLE_LIGHT_FREE='https://tiles.openfreemap.org/styles/liberty', STYLE_DARK_FREE='https://tiles.openfreemap.org/styles/dark';
 const STYLE_LIGHT_MB='mapbox://styles/mapbox/streets-v12', STYLE_DARK_MB='mapbox://styles/mapbox/dark-v11';
 const THEME_KEY='ig-theme';
@@ -895,7 +897,7 @@ const App={
   /* ═══ בחירת מסלול: המהיר לפי פקקים, או הקצר לפי אורך ═══ */
   _pick(routes){
     const fast=routes.reduce((a,b)=>b.duration<a.duration?b:a),short=routes.reduce((a,b)=>b.distance<a.distance?b:a);
-    return (this._routePref==='short')?short:fast;
+    return (this._routePref==='short')?short:fast;   // בחלופה שאינה המהירה/הקצרה חוזרים למהיר בחישוב מחדש
   },
   _fmtT(s){const m=Math.round(s/60);return m<60?m+' דק׳':Math.floor(m/60)+' שע׳ '+m%60+' דק׳'},
   _fmtD(d){return d<1000?Math.round(d)+' מ׳':(d/1000).toFixed(1)+' ק״מ'},
@@ -914,13 +916,12 @@ const App={
     this._altFC={type:'FeatureCollection',features:rs.filter(r=>r!==route).map(r=>({type:'Feature',properties:{},geometry:r.geometry}))};
     if(this.map&&this.map.getSource('route')){this.map.getSource('route').setData(this._routeFC);this.map.getSource('route-alt').setData(this._altFC)}
     // בורר המהיר/הקצר — רק כשיש באמת שני מסלולים שונים
-    const seg=document.getElementById('altSeg');
+    const seg=document.getElementById('altSeg');seg.innerHTML='';
     const fast=rs.reduce((a,b)=>b.duration<a.duration?b:a),short=rs.reduce((a,b)=>b.distance<a.distance?b:a);
-    if(!walking&&rs.length>1&&fast!==short){
+    if(!walking&&rs.length>1){
       seg.style.display='flex';
-      seg.querySelector('[data-pref=fast]').textContent=`המהיר ${this._fmtT(fast.duration)} · ${this._fmtD(fast.distance)}`;
-      seg.querySelector('[data-pref=short]').textContent=`הקצר ${this._fmtT(short.duration)} · ${this._fmtD(short.distance)}`;
-      seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.pref===(this._routePref==='short'?'short':'fast')));
+      const opts=[];opts.push({r:fast,l:'המהיר'});if(short!==fast)opts.push({r:short,l:'הקצר'});for(const r of rs){if(opts.length>=3)break;if(!opts.some(o=>o.r===r))opts.push({r,l:'חלופה'})}
+      for(const o of opts){const b=document.createElement('button');b.textContent=`${o.l} ${this._fmtT(o.r.duration)} · ${this._fmtD(o.r.distance)}`;b.classList.toggle('on',o.r===route);b.onclick=()=>{this._routePref=o.r===fast?'fast':o.r===short?'short':'alt';this._applyRoute(o.r,walking);this.updateNavInfo()};seg.appendChild(b)}
     }else seg.style.display='none';
     // מספרים
     const coords=route.geometry.coordinates;
@@ -976,10 +977,7 @@ const App={
     const c=route.geometry.coordinates;let s=c[0].slice(),e=c[0].slice();for(const q of c){s=[Math.min(s[0],q[0]),Math.min(s[1],q[1])];e=[Math.max(e[0],q[0]),Math.max(e[1],q[1])]}
     const pad=0.01;
     try{
-      const body='data='+encodeURIComponent(`[out:json][timeout:15];(node["highway"="speed_camera"](${s[1]-pad},${s[0]-pad},${e[1]+pad},${e[0]+pad});node["enforcement"="maxspeed"](${s[1]-pad},${s[0]-pad},${e[1]+pad},${e[0]+pad}););out 200;`);
-      const ac=new AbortController();const tm=setTimeout(()=>ac.abort('timeout'),16000);
-      const res=await fetch(OVERPASS,{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ac.signal}).finally(()=>clearTimeout(tm));
-      const j=await res.json();
+      const j=await overpass(`[out:json][timeout:15];(node["highway"="speed_camera"](${s[1]-pad},${s[0]-pad},${e[1]+pad},${e[0]+pad});node["enforcement"="maxspeed"](${s[1]-pad},${s[0]-pad},${e[1]+pad},${e[0]+pad}););out 200;`,16000);
       // רק מצלמות שיושבות על המסלול (עד 40 מ׳ מהקו)
       const near=(la,lo)=>{let best=1e9,idx=-1;for(let i=0;i<c.length;i++){const d=this.dist(la,lo,c[i][1],c[i][0]);if(d<best){best=d;idx=i}}return{best,idx}};
       this._cams=(j.elements||[]).map(el=>{const q=near(el.lat,el.lon);return q.best<40?{lat:el.lat,lng:el.lon,idx:q.idx,maxspeed:(el.tags||{}).maxspeed,warned:false}:null}).filter(Boolean);
@@ -1030,11 +1028,7 @@ const App={
     if(!c){this.toast('⚠️ אין עדיין מיקום');return}
     this.toast('מחפש '+LBL[kind]+' בסביבה…');
     try{
-      const body='data='+encodeURIComponent(`[out:json][timeout:20];(${Q[kind]}(around:8000,${c.lat},${c.lng}););out center tags 60;`);
-      const ac=new AbortController();const tm=setTimeout(()=>ac.abort('timeout'),22000);
-      const res=await fetch(OVERPASS,{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ac.signal}).finally(()=>clearTimeout(tm));
-      if(res.status===429||res.status>=500){this.toast('שירות הנתונים עמוס — נסה שוב בעוד רגע');return}
-      const j=await res.json();
+      const j=await overpass(`[out:json][timeout:20];(${Q[kind]}(around:8000,${c.lat},${c.lng}););out center tags 60;`,22000);
       const items=(j.elements||[]).map(e=>{const la=e.lat??(e.center&&e.center.lat),lo=e.lon??(e.center&&e.center.lon);if(la==null)return null;const tg=e.tags||{};return{lat:la,lng:lo,name:cleanName(tg['name:he']||tg.name||ONE[kind]),d:this.dist(c.lat,c.lng,la,lo)}}).filter(Boolean).sort((a,b)=>a.d-b.d).slice(0,30);
       if(!items.length){this.toast('לא נמצאו '+LBL[kind]+' ברדיוס 8 ק״מ');return}
       this._help=items.map(it=>{const el=document.createElement('div');el.style.cssText='display:flex;flex-direction:column;align-items:center;cursor:pointer';const ic=document.createElement('div');ic.textContent=ICO[kind];ic.style.cssText='font-size:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))';const lb=document.createElement('div');lb.textContent=it.name;lb.style.cssText='font:600 11px Heebo,sans-serif;background:var(--card-solid);color:var(--text);padding:2px 6px;border-radius:8px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)';el.append(ic,lb);el.onclick=ev=>{ev.stopPropagation();this.setDest(it.lat,it.lng,it.name);document.getElementById('searchInput').value=it.name};return new GL.Marker({element:el,anchor:'bottom'}).setLngLat([it.lng,it.lat]).addTo(this.map)});
@@ -1212,7 +1206,6 @@ const App={
     if(window.ResizeObserver)new ResizeObserver(setSH).observe(sheetEl);setSH();
     document.getElementById('btnNav').onclick=()=>this._nav?this.stopNav():this.startNav();
     document.getElementById('turnStop').onclick=()=>this.stopNav();
-    document.querySelectorAll('#altSeg button').forEach(b=>b.onclick=()=>this.setRoutePref(b.dataset.pref));
     // הלוח התחתון: הידית פותחת/סוגרת, וגם החלקה מעלה/מטה עליו
     const sh=document.getElementById('sheet');let sy=null;
     document.getElementById('sheetGrip').onclick=()=>sh.classList.toggle('collapsed');
