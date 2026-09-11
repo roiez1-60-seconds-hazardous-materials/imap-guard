@@ -1107,10 +1107,16 @@ const App={
     document.getElementById('turn').classList.add('active');document.getElementById('searchArea').classList.add('navhide');document.body.classList.add('navon');
     document.getElementById('btnNavT').textContent='עצור ניווט';
     if(!this.tracking)this.startTrack();
-    try{if(navigator.wakeLock)this._wake=await navigator.wakeLock.request('screen')}catch(e){}
+    await this._keepAwake();
     if(this.ready){const b=this.heading??0;this.map.easeTo({center:[this.pos.lng,this.pos.lat],bearing:b,pitch:55,zoom:16.5,duration:900})}
     if(!this._steps||!this._steps.length)await this.fetchRoute();
     this._updateTurn();this._updateNavBar();
+  },
+  /* המסך נשאר דולק בזמן ניווט; המערכת משחררת את הנעילה כשעוברים לאפליקציה אחרת — מחדשים בחזרה */
+  async _keepAwake(){
+    if(!navigator.wakeLock||!this._nav)return;
+    try{this._wake=await navigator.wakeLock.request('screen');this._wake.addEventListener('release',()=>{this._wake=null});if(!this._wakeHooked){this._wakeHooked=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&this._nav&&!this._wake)this._keepAwake()})}}
+    catch(e){if(!this._wakeWarned){this._wakeWarned=true;this.toast('המכשיר לא מאפשר להשאיר את המסך דולק — בטל נעילה אוטומטית בהגדרות')}}
   },
   stopNav(){
     this._nav=false;
