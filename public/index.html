@@ -855,7 +855,7 @@ const App={
         const prox=this.pos?`&proximity=${this.pos.lng},${this.pos.lat}`:'';
         const r=await(await timedFetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=il&language=he&limit=5${prox}`,8000,ac)).json();
         const mb=(r.features||[]).map(f=>({nm:(f.address?f.text+' '+f.address:f.text)||f.place_name.split(',')[0],ad:f.place_name.split(',').slice(1).join(', ').replace(/,\s*ישראל$/,''),full:f.place_name.replace(/,\s*ישראל$/,''),lat:f.center[1],lng:f.center[0]}));
-        for(const m of mb){if(!items.some(i=>this.dist(i.lat,i.lng,m.lat,m.lng)<60))items.push(m)}
+        for(const m of mb){if(!items.some(i=>this.dist(i.lat,i.lng,m.lat,m.lng)<60||(i.nm===m.nm&&i.ad===m.ad)))items.push(m)}
       }else if(!hasNum){
         items=await nomi(`q=${encodeURIComponent(q)}`);
       }else if(items.length<3){
