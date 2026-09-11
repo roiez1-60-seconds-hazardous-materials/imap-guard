@@ -48,7 +48,7 @@
 .ctrl:active{background:var(--blue-light)}
 .ctrl.on{color:var(--blue)}
 .seg{display:flex;background:rgba(118,118,128,0.12);border-radius:11px;padding:2px;gap:2px}
-.seg button,.seg .route-mode,.seg .route-mode.active{flex:1;border:0;box-shadow:none;background:transparent;border-radius:9px;padding:8px 6px;font-family:inherit;font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;-webkit-appearance:none}
+.seg button,.seg .route-mode,.seg .route-mode.active{flex:1;border:0;box-shadow:none;background:transparent;border-radius:9px;padding:7px 4px;white-space:nowrap;font-family:inherit;font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;-webkit-appearance:none}
 .seg button.on,.seg .route-mode.active{background:var(--card-solid);color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,0.12)}
 .seg .ico{width:18px;height:18px}
 .abtn{flex:1;height:50px;border-radius:14px;border:0;font-family:inherit;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;-webkit-appearance:none;transition:transform .15s}
@@ -58,6 +58,18 @@
 .abtn.secondary.live{background:var(--green);color:#fff;border-color:transparent}
 .abtn.icon{flex:0 0 50px;padding:0}
 .abtn .ico{width:20px;height:20px}
+/* מצב מכווץ (ברירת המחדל): שורת מצב דקה + כפתורים — המפה מקבלת את רוב המסך. משיכת הידית פותחת את כל המדדים */
+.sheet.collapsed .metrics{display:flex;gap:6px;margin-bottom:10px}
+.sheet.collapsed .metric-card{flex:1;min-width:0;padding:7px 4px;border-radius:10px}
+.sheet.collapsed .metric-card:nth-child(4),.sheet.collapsed .metric-card:nth-child(6){display:none}
+.sheet.collapsed .metric-label{font-size:8.5px;margin-bottom:2px}
+.sheet.collapsed .metric-value{font-size:15px}
+.sheet.collapsed .metric-unit{display:none}
+.sheet.collapsed .credit-line{display:none}
+.sheet.collapsed .abtn{height:44px;font-size:14px}
+.sheet-grip{cursor:pointer;padding:6px 0;margin:-6px auto 8px;width:60px;background:none}
+.sheet-grip::after{content:'';display:block;width:36px;height:5px;border-radius:3px;background:rgba(0,0,0,0.14);margin:0 auto}
+[data-theme=dark] .sheet-grip::after{background:rgba(255,255,255,0.25)}
 .sheet.hasdest .metrics,.sheet.hasdest .credit-line,.sheet.hasdest .actions{display:none}
 .nav-tools{display:flex;gap:6px;align-items:center}
 .sheet.hasdest .actions{margin-top:0}
@@ -139,8 +151,8 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .sos-pos{margin-top:14px;font-size:14px;line-height:1.6;color:#d1d1d6;background:rgba(255,255,255,.08);border-radius:14px;padding:12px 14px}
 .sos-pos b{color:#fff;font-size:16px;direction:ltr;unicode-bidi:isolate}
 .sos-note{margin-top:auto;font-size:12px;color:#8e8e93;text-align:center;padding-top:14px}
-.open-in{display:flex;gap:8px;margin-top:10px}
-.open-in a{flex:1;text-align:center;padding:9px 6px;border-radius:12px;background:#e4efff;color:#0a5fd1;font-weight:700;font-size:13px;text-decoration:none;border:0.5px solid rgba(0,122,255,.25)}
+.open-in{display:flex;gap:6px;margin-top:8px;align-items:center;font-size:12px;color:var(--text3)}
+.open-in a{padding:5px 10px;border-radius:10px;background:#e4efff;color:#0a5fd1;font-weight:700;font-size:12px;text-decoration:none}
 .search-go{background:none;border:0;padding:0;cursor:pointer;color:inherit;display:flex}
 .acc-chip{font-size:12px;font-weight:600;color:var(--text3);background:rgba(255,255,255,0.65);padding:6px 12px;border-radius:18px;border:0.5px solid var(--sep)}
 .about-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.65);border:0.5px solid var(--sep);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:16px;color:var(--text3);transition:all .15s}
@@ -185,7 +197,7 @@ body{font-family:'Heebo',-apple-system,sans-serif;background:var(--bg);color:var
 .turn-dist{font-size:24px;font-weight:800;color:var(--blue);line-height:1.1}
 .turn-text{font-size:15px;font-weight:600;color:var(--text);line-height:1.25;max-height:2.5em;overflow:hidden}
 .turn-stop{border:0;background:var(--red-light);color:var(--red);border-radius:12px;padding:8px 12px;font-weight:700;font-family:inherit;font-size:14px;cursor:pointer}
-.btn-nav{width:100%;margin-top:10px;background:var(--blue);color:#fff;border:0;border-radius:14px;padding:12px;font-weight:800;font-size:16px;font-family:inherit;cursor:pointer;box-shadow:0 4px 16px rgba(0,122,255,0.25)}
+.btn-nav{width:100%;margin-top:8px;background:var(--blue);color:#fff;border:0;border-radius:14px;padding:11px;font-weight:800;font-size:16px;font-family:inherit;cursor:pointer;box-shadow:0 4px 16px rgba(0,122,255,0.25)}
 .credit-line{font-size:10.5px;color:var(--text3);text-align:center;margin-top:10px}
 .offline-pill{position:fixed;bottom:calc(var(--sheet-h,300px) + 10px);left:14px;z-index:1004;background:#1c1c1e;color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:12px;display:none}
 .offline-pill.active{display:block}
@@ -225,29 +237,29 @@ body.navon .sheet{max-height:calc(100vh - var(--under-top) - var(--banners-h,0px
 
 /* Bottom Sheet */
 .sheet{position:fixed;bottom:0;left:0;right:0;z-index:999;max-height:calc(100vh - var(--ctrl-top) - 196px);max-height:calc(100dvh - var(--ctrl-top) - 196px);overflow-y:auto;overscroll-behavior:contain;background:var(--card);backdrop-filter:var(--blur-heavy);-webkit-backdrop-filter:var(--blur-heavy);border-radius:22px 22px 0 0;border-top:0.5px solid var(--sep);box-shadow:0 -4px 32px rgba(0,0,0,0.06);padding:6px 18px var(--safe-bottom)}
-.sheet-grip{width:36px;height:5px;border-radius:3px;background:rgba(0,0,0,0.1);margin:4px auto 14px}
+.sheet-grip-old{display:none}
 
 /* Nav Panel */
-.nav-panel{display:none;margin-bottom:14px}
+.nav-panel{display:none;margin-bottom:10px}
 .nav-panel.active{display:block;animation:navSlide .3s ease}
 @keyframes navSlide{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
 .nav-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .nav-info{flex:1}
 .nav-label{font-size:12.5px;color:var(--text3);margin-bottom:3px;line-height:1.3}
-.nav-distance{font-size:32px;font-weight:900;color:var(--blue);line-height:1;letter-spacing:-1px}
-.nav-time{font-size:14px;color:var(--text2);font-weight:600;margin-top:4px}
-.nav-bearing{font-size:13px;color:var(--text3);margin-top:2px}
+.nav-distance{font-size:28px;font-weight:900;color:var(--blue);line-height:1;letter-spacing:-.5px;display:inline}
+.nav-time{font-size:15px;color:var(--text2);font-weight:700;display:inline;margin-inline-start:8px}
+.nav-bearing{font-size:12px;color:var(--text3);margin-top:4px}
 .nav-dismiss{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.05);border:none;font-size:16px;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center}
 .nav-dismiss:active{background:rgba(0,0,0,0.1);transform:scale(.9)}
 
 /* Route mode selector */
-.route-modes{display:flex;gap:6px;margin-bottom:10px}
+.route-modes{display:flex;gap:6px;margin-bottom:8px}
 .route-mode{flex:1;padding:8px;border-radius:var(--radius-sm);border:1.5px solid var(--sep);background:var(--bg);font-family:inherit;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;text-align:center;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
 .route-mode.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
 .route-mode:active{transform:scale(.96)}
 
 /* Nav card wrapper */
-.nav-card-bg{background:linear-gradient(135deg,rgba(0,122,255,0.06),rgba(0,122,255,0.02));border:1px solid rgba(0,122,255,0.12);border-radius:var(--radius);padding:14px 16px;overflow:hidden;position:relative}
+.nav-card-bg{background:linear-gradient(135deg,rgba(0,122,255,0.06),rgba(0,122,255,0.02));border:1px solid rgba(0,122,255,0.12);border-radius:var(--radius);padding:12px 14px;overflow:hidden;position:relative}
 .nav-card-bg::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(0,122,255,0.06)}
 
 /* Metrics */
@@ -371,8 +383,8 @@ body.radar-on{--stack-h:46px}
 
 <div id="map"></div>
 
-<div class="sheet">
-  <div class="sheet-grip"></div>
+<div class="sheet collapsed" id="sheet">
+  <div class="sheet-grip" id="sheetGrip" role="button" aria-label="הרחב או כווץ"></div>
   <div class="nav-panel" id="navPanel">
     <div class="route-modes seg">
       <button class="route-mode active" id="modeDrive" data-mode="driving-traffic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13.5 5.6 8.6A2 2 0 0 1 7.5 7.2h9a2 2 0 0 1 1.9 1.4L20 13.5"/><rect x="3" y="13.5" width="18" height="5" rx="1.5"/><circle cx="7.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/><circle cx="16.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/></svg>נסיעה</button>
@@ -389,6 +401,7 @@ body.radar-on{--stack-h:46px}
         <div class="nav-tools"><button class="nav-dismiss" id="btnShare2" aria-label="שיתוף יעד" title="שיתוף בוואטסאפ"><svg class="ico" style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></button>
         <button class="nav-dismiss" id="navDismiss" aria-label="סגור"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       </div>
+      <div class="seg" id="altSeg" style="display:none;margin-top:8px;font-size:12.5px"><button data-pref="fast" class="on">המהיר</button><button data-pref="short">הקצר</button></div>
       <div class="open-in" id="openIn"></div>
       <button class="btn-nav" id="btnNav"><span class="ico" style="display:inline-block;vertical-align:-5px;margin-inline-end:6px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 19.5 21 12 17l-7.5 4z"/></svg></span><span id="btnNavT">התחל ניווט</span></button>
     </div>
@@ -555,9 +568,15 @@ const App={
       }
 
       // Route source — שומר את הקו האחרון כדי שיחזור אחרי החלפת סגנון
+      if(!this.map.getSource('route-alt')){
+        this.map.addSource('route-alt',{type:'geojson',data:this._altFC||{type:'FeatureCollection',features:[]}});
+        this.map.addLayer({id:'route-alt-line',type:'line',source:'route-alt',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#8e8e93','line-width':5,'line-opacity':0.55}});
+      }
       if(!this.map.getSource('route')){
-        this.map.addSource('route',{type:'geojson',data:{type:'Feature',geometry:this._routeGeo||{type:'LineString',coordinates:[]}}});
-        this.map.addLayer({id:'route-line',type:'line',source:'route',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#007aff','line-width':6,'line-opacity':0.75}});
+        this.map.addSource('route',{type:'geojson',data:this._routeFC||{type:'FeatureCollection',features:[]}});
+        this.map.addLayer({id:'route-casing',type:'line',source:'route',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#ffffff','line-width':9,'line-opacity':0.9}});
+        // צבע הקו לפי העומס בכל קטע (ממפבוקס); בלי נתון — כחול
+        this.map.addLayer({id:'route-line',type:'line',source:'route',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':['match',['get','c'],'low','#1f9d55','moderate','#ff9500','heavy','#ff3b30','severe','#a40000','#007aff'],'line-width':6,'line-opacity':0.95}});
       }
       if(!this.map.getSource('dr-trail')){
         this.map.addSource('dr-trail',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:DR.trail?DR.trail.map(q=>[q.lng,q.lat]):[]}}});
@@ -806,7 +825,7 @@ const App={
     document.getElementById('navLabel').textContent='ניווט ל: '+(full&&full!==name?full:name);
     document.getElementById('navDistance').textContent='—';document.getElementById('navTime').textContent='';
     // פתיחה באפליקציות ניווט אחרות
-    const oi=document.getElementById('openIn');oi.innerHTML='';
+    const oi=document.getElementById('openIn');oi.innerHTML='';const ol=document.createElement('span');ol.textContent='פתח ב:';oi.appendChild(ol);
     [['Waze',`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`],['Google Maps',`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`],['Apple Maps',`https://maps.apple.com/?daddr=${lat},${lng}`]].forEach(([l,u])=>{const a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener';a.textContent=l;oi.appendChild(a)});
     await this.fetchRoute();
   },
@@ -822,11 +841,12 @@ const App={
     try{
       let route=null;
       if(USE_MAPBOX){
-        const r=await(await timedFetch(`https://api.mapbox.com/directions/v5/mapbox/${this.routeMode}/${from.lng},${from.lat};${dest.lng},${dest.lat}?geometries=geojson&overview=full&steps=true&language=he&access_token=${MAPBOX_TOKEN}`,8000,ac)).json();
+        const extra=walking?'':'&alternatives=true&annotations=congestion';
+        const r=await(await timedFetch(`https://api.mapbox.com/directions/v5/mapbox/${this.routeMode}/${from.lng},${from.lat};${dest.lng},${dest.lat}?geometries=geojson&overview=full&steps=true&language=he${extra}&access_token=${MAPBOX_TOKEN}`,8000,ac)).json();
         if(stale())return;
         if(!r.routes||!r.routes.length){this.toast('לא נמצא מסלול');return}
-        route=r.routes[0];
-        route._steps=(route.legs||[]).flatMap(l=>l.steps||[]).map(s=>({loc:s.maneuver.location,text:s.maneuver.instruction||osrmStep(s).text,arrow:ARROW[s.maneuver.modifier]||(s.maneuver.type==='arrive'?ARROW.arrive:'↑')}));
+        for(const rt of r.routes)rt._steps=(rt.legs||[]).flatMap(l=>l.steps||[]).map(s=>({loc:s.maneuver.location,text:s.maneuver.instruction||osrmStep(s).text,arrow:ARROW[s.maneuver.modifier]||(s.maneuver.type==='arrive'?ARROW.arrive:'↑')}));
+        this._routes=r.routes;route=this._pick(r.routes);
       }
       if(!route&&walking){
         /* Valhalla: מסלול הולכי רגל אמיתי (שבילים, מדרכות) */
@@ -843,23 +863,20 @@ const App={
       }
       if(!route){
         /* OSRM: מסלול נסיעה. בהליכה — אותו קו, והזמן לפי 5 קמ״ש */
-        const url=`${OSRM}${from.lng},${from.lat};${dest.lng},${dest.lat}?geometries=geojson&overview=full&steps=true`;
+        const url=`${OSRM}${from.lng},${from.lat};${dest.lng},${dest.lat}?geometries=geojson&overview=full&steps=true${walking?'':'&alternatives=true'}`;
         let res=await timedFetch(url,8000,ac);
         if(stale())return;
         if(res.status===429||res.status>=500){this.toast('שירות הניווט עמוס — מנסה שוב');await new Promise(r=>setTimeout(r,1500));if(stale())return;res=await timedFetch(url,8000,ac);if(stale())return;if(res.status===429||res.status>=500){this.toast('שירות הניווט אינו זמין כרגע, נסה שוב בעוד רגע');return}}
         let r=null;try{r=await res.json()}catch(e){this.toast('שירות הניווט אינו זמין כרגע, נסה שוב בעוד רגע');return}
         if(stale())return;
         if(!r.routes||!r.routes.length){this.toast('לא נמצא מסלול');return}
-        route=r.routes[0];
-        route._steps=(route.legs||[]).flatMap(l=>l.steps||[]).map(osrmStep);
-        if(walking)route.duration=route.distance/1.39;
+        for(const rt of r.routes){rt._steps=(rt.legs||[]).flatMap(l=>l.steps||[]).map(osrmStep);if(walking)rt.duration=rt.distance/1.39}
+        this._routes=r.routes;route=this._pick(r.routes);
       }
       if(stale())return;
-      this._routeFrom=from;this._routeGeo=route.geometry;this._steps=route._steps||[];this._stepIdx=0;
-      // Draw route
-      if(this.map&&this.map.getSource('route')){
-        this.map.getSource('route').setData({type:'Feature',geometry:route.geometry});
-      }
+      if(!this._routes||!this._routes.length)this._routes=[route];
+      this._routeFrom=from;this._applyRoute(route,walking);
+      this._routeGeo=route.geometry;
       // Fit bounds — הריפוד לפי הגובה האמיתי של הלוח התחתון ושדה החיפוש
       const coords=route.geometry.coordinates;
       if(this.map&&coords.length&&!this._nav){
@@ -867,17 +884,59 @@ const App={
         this.map.fitBounds(bounds,{padding:this._padding(),duration:1000});
       }
       if(this._nav)this._updateTurn();
-      // Update nav info
-      const dist=route.distance, dur=route.duration;
-      document.getElementById('navDistance').textContent=dist<1000?Math.round(dist)+' מטר':(dist/1000).toFixed(1)+' ק״מ';
-      const mins=Math.round(dur/60);
-      document.getElementById('navTime').textContent=(mins<60?mins+' דקות':Math.floor(mins/60)+' שע׳ '+mins%60+' דק׳')+(walking?' הליכה':' נסיעה');
       this.updateNavInfo();
     }catch(e){
       if(stale()||(ac.signal.aborted&&ac.signal.reason==='new'))return;
       console.error('Route error:',e);
       this.toast(ac.signal.aborted?'⚠️ שירות הניווט לא ענה — בדוק חיבור':'⚠️ שגיאה בחישוב מסלול');
     }
+  },
+
+  /* ═══ בחירת מסלול: המהיר לפי פקקים, או הקצר לפי אורך ═══ */
+  _pick(routes){
+    const fast=routes.reduce((a,b)=>b.duration<a.duration?b:a),short=routes.reduce((a,b)=>b.distance<a.distance?b:a);
+    return (this._routePref==='short')?short:fast;
+  },
+  _fmtT(s){const m=Math.round(s/60);return m<60?m+' דק׳':Math.floor(m/60)+' שע׳ '+m%60+' דק׳'},
+  _fmtD(d){return d<1000?Math.round(d)+' מ׳':(d/1000).toFixed(1)+' ק״מ'},
+  _segFC(route){
+    const c=route.geometry.coordinates;const cong=(route.legs||[]).flatMap(l=>(l.annotation&&l.annotation.congestion)||[]);
+    if(!cong.length||cong.length!==c.length-1)return{type:'FeatureCollection',features:[{type:'Feature',properties:{c:'none'},geometry:route.geometry}]};
+    const f=[];let cur=null,pts=[];
+    for(let i=0;i<c.length-1;i++){const v=cong[i]||'unknown';if(v!==cur){if(pts.length>1)f.push({type:'Feature',properties:{c:cur},geometry:{type:'LineString',coordinates:pts}});cur=v;pts=[c[i]]}pts.push(c[i+1])}
+    if(pts.length>1)f.push({type:'Feature',properties:{c:cur},geometry:{type:'LineString',coordinates:pts}});
+    return{type:'FeatureCollection',features:f};
+  },
+  _applyRoute(route,walking){
+    const rs=this._routes||[route];
+    this._routeGeo=route.geometry;this._steps=route._steps||[];this._stepIdx=0;
+    this._routeFC=this._segFC(route);this._cong=(route.legs||[]).flatMap(l=>(l.annotation&&l.annotation.congestion)||[]);this._jamWarnIdx=null;if(!walking)this._loadCameras(route);else this._cams=[];
+    this._altFC={type:'FeatureCollection',features:rs.filter(r=>r!==route).map(r=>({type:'Feature',properties:{},geometry:r.geometry}))};
+    if(this.map&&this.map.getSource('route')){this.map.getSource('route').setData(this._routeFC);this.map.getSource('route-alt').setData(this._altFC)}
+    // בורר המהיר/הקצר — רק כשיש באמת שני מסלולים שונים
+    const seg=document.getElementById('altSeg');
+    const fast=rs.reduce((a,b)=>b.duration<a.duration?b:a),short=rs.reduce((a,b)=>b.distance<a.distance?b:a);
+    if(!walking&&rs.length>1&&fast!==short){
+      seg.style.display='flex';
+      seg.querySelector('[data-pref=fast]').textContent=`המהיר ${this._fmtT(fast.duration)} · ${this._fmtD(fast.distance)}`;
+      seg.querySelector('[data-pref=short]').textContent=`הקצר ${this._fmtT(short.duration)} · ${this._fmtD(short.distance)}`;
+      seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.pref===(this._routePref==='short'?'short':'fast')));
+    }else seg.style.display='none';
+    // מספרים
+    const coords=route.geometry.coordinates;
+    if(this.map&&coords.length&&!this._nav){
+      const all=rs.flatMap(r=>r.geometry.coordinates);
+      const bounds=all.reduce((b,c)=>b.extend(c),new GL.LngLatBounds(all[0],all[0]));
+      this.map.fitBounds(bounds,{padding:this._padding(),duration:1000});
+    }
+    document.getElementById('navDistance').textContent=this._fmtD(route.distance).replace(' מ׳',' מטר');
+    const hasCong=(route.legs||[]).some(l=>l.annotation&&l.annotation.congestion);
+    document.getElementById('navTime').textContent=this._fmtT(route.duration).replace('דק׳','דקות')+(walking?' הליכה':hasCong?' נסיעה · לפי פקקים':' נסיעה');
+    if(this._nav)this._updateTurn();
+  },
+  setRoutePref(pref){
+    this._routePref=pref;
+    if(this._routes&&this._routes.length>1){const r=this._pick(this._routes);this._applyRoute(r,this.routeMode==='walking');this.updateNavInfo()}
   },
 
   updateNavInfo(){
@@ -889,7 +948,7 @@ const App={
     document.getElementById('navBearing').textContent='כיוון: '+this.heb(b)+' · '+Math.round(b)+'° · '+ds+' בקו אווירי';
     // זזנו יותר מ־100 מ׳ מנקודת חישוב המסלול — מחשבים מחדש (לא יותר מפעם ב־10 שנ׳)
     if(this._routeFrom&&this.dist(this.pos.lat,this.pos.lng,this._routeFrom.lat,this._routeFrom.lng)>100&&Date.now()-this._routeFrom.t>10000){this._routeFrom.t=Date.now();this.fetchRoute()}
-    if(this._nav)this._updateTurn();
+    if(this._nav){this._updateTurn();this._checkAlerts()}
   },
 
   /* ═══ ניווט פעיל: כרטיס הפנייה הבאה, מצלמה עוקבת, מסך דולק ═══ */
@@ -910,6 +969,30 @@ const App={
     document.getElementById('turnText').textContent=s.text;
     if(this._spokenIdx!==this._stepIdx&&d<250){this._spokenIdx=this._stepIdx;this._say(s.text)}
     if(this._stepIdx===st.length-1&&d<30){this.toast('🏁 הגעת ליעד');this.stopNav()}
+  },
+  /* ═══ התראות בנסיעה: מצלמות מהירות (OpenStreetMap) ופקק לפניך (עומס לפי מפבוקס לאורך המסלול) ═══ */
+  async _loadCameras(route){
+    this._cams=[];if(!route||!route.geometry)return;
+    const c=route.geometry.coordinates;let s=c[0].slice(),e=c[0].slice();for(const q of c){s=[Math.min(s[0],q[0]),Math.min(s[1],q[1])];e=[Math.max(e[0],q[0]),Math.max(e[1],q[1])]}
+    const pad=0.01;
+    try{
+      const body='data='+encodeURIComponent(`[out:json][timeout:15];(node["highway"="speed_camera"](${s[1]-pad},${s[0]-pad},${e[1]+pad},${e[0]+pad});node["enforcement"="maxspeed"](${s[1]-pad},${s[0]-pad},${e[1]+pad},${e[0]+pad}););out 200;`);
+      const ac=new AbortController();const tm=setTimeout(()=>ac.abort('timeout'),16000);
+      const res=await fetch(OVERPASS,{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ac.signal}).finally(()=>clearTimeout(tm));
+      const j=await res.json();
+      // רק מצלמות שיושבות על המסלול (עד 40 מ׳ מהקו)
+      const near=(la,lo)=>{let best=1e9,idx=-1;for(let i=0;i<c.length;i++){const d=this.dist(la,lo,c[i][1],c[i][0]);if(d<best){best=d;idx=i}}return{best,idx}};
+      this._cams=(j.elements||[]).map(el=>{const q=near(el.lat,el.lon);return q.best<40?{lat:el.lat,lng:el.lon,idx:q.idx,maxspeed:(el.tags||{}).maxspeed,warned:false}:null}).filter(Boolean);
+      if(this._cams.length)this.toast(`${this._cams.length} מצלמות מהירות על המסלול — תקבל התראה 300 מ׳ לפני`);
+    }catch(e){}
+  },
+  _checkAlerts(){
+    if(!this._nav||!this.pos||!this._routeGeo)return;
+    const c=this._routeGeo.coordinates;
+    let best=1e9,me=0;for(let i=0;i<c.length;i++){const d=this.dist(this.pos.lat,this.pos.lng,c[i][1],c[i][0]);if(d<best){best=d;me=i}}
+    const ahead=(idx)=>{let m=0;for(let i=me;i<idx&&i<c.length-1;i++)m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);return m};
+    for(const cam of (this._cams||[])){if(cam.warned||cam.idx<me)continue;const d=ahead(cam.idx);if(d<=320){cam.warned=true;const msg='מצלמת מהירות בעוד '+Math.round(d/10)*10+' מ׳'+(cam.maxspeed?' · מותר '+cam.maxspeed:'');this.toast(msg);this._say(msg);try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}}}
+    const cong=this._cong||[];if(cong.length){let m=0;for(let i=me;i<c.length-1&&m<1000;i++){m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);const v=cong[i];if((v==='heavy'||v==='severe')&&(this._jamWarnIdx==null||i>this._jamWarnIdx+20)){this._jamWarnIdx=i;const msg=(v==='severe'?'פקק כבד':'עומס תנועה')+' בעוד '+Math.round(m/50)*50+' מ׳';this.toast(msg);this._say(msg);break}}}
   },
   _say(txt){try{if(!('speechSynthesis'in window))return;const u=new SpeechSynthesisUtterance(txt);u.lang='he-IL';const v=speechSynthesis.getVoices().find(v=>/^he/i.test(v.lang));if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},
   async startNav(){
@@ -1028,7 +1111,8 @@ const App={
   clearNav(){
     this.dest=null;
     if(this._destMarker){this._destMarker.remove();this._destMarker=null}
-    if(this.map.getSource('route'))this.map.getSource('route').setData({type:'Feature',geometry:{type:'LineString',coordinates:[]}});
+    this._routes=null;this._routeFC=null;this._altFC=null;document.getElementById('altSeg').style.display='none';
+    if(this.map&&this.map.getSource('route')){this.map.getSource('route').setData({type:'FeatureCollection',features:[]});this.map.getSource('route-alt').setData({type:'FeatureCollection',features:[]})}
     document.getElementById('navPanel').classList.remove('active');document.querySelector('.sheet').classList.remove('hasdest');
     document.getElementById('searchInput').value='';
     document.getElementById('navTime').textContent='';
@@ -1128,6 +1212,12 @@ const App={
     if(window.ResizeObserver)new ResizeObserver(setSH).observe(sheetEl);setSH();
     document.getElementById('btnNav').onclick=()=>this._nav?this.stopNav():this.startNav();
     document.getElementById('turnStop').onclick=()=>this.stopNav();
+    document.querySelectorAll('#altSeg button').forEach(b=>b.onclick=()=>this.setRoutePref(b.dataset.pref));
+    // הלוח התחתון: הידית פותחת/סוגרת, וגם החלקה מעלה/מטה עליו
+    const sh=document.getElementById('sheet');let sy=null;
+    document.getElementById('sheetGrip').onclick=()=>sh.classList.toggle('collapsed');
+    sh.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,input'))return;sy=e.clientY});
+    sh.addEventListener('pointerup',e=>{if(sy===null)return;const dy=e.clientY-sy;sy=null;if(dy<-40)sh.classList.remove('collapsed');else if(dy>40)sh.classList.add('collapsed')});
     document.querySelectorAll('.help-chip').forEach(ch=>ch.onclick=()=>this.loadHelp(ch.classList.contains('on')?null:ch.dataset.kind));
     const sa=document.getElementById('searchArea');sa.addEventListener('focusin',()=>{sa.classList.add('focus');document.body.classList.add('searching')});sa.addEventListener('focusout',()=>setTimeout(()=>{if(!sa.contains(document.activeElement)){sa.classList.remove('focus');document.body.classList.remove('searching')}},150));
     document.addEventListener('click',e=>{if(!e.target.closest('.search-area')){sa.classList.remove('focus');document.body.classList.remove('searching')}});
