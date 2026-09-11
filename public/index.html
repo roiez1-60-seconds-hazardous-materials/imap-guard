@@ -73,11 +73,14 @@
 /* בזמן ניווט: שורה אחת — נותר · מרחק · הגעה · עצור. הכרטיס המלא מוסתר */
 body.navon .sheet .nav-panel{display:none}
 /* כרטיס יעד מכווץ: שם, מרחק·זמן, התחל — האפשרויות (נסיעה/הליכה, מסלולים) נפתחות בלחיצה */
-.sheet.collapsed .route-modes,.sheet.collapsed #altSeg,.sheet.collapsed .nav-bearing{display:none!important}
+.sheet.collapsed .nav-bearing{display:none!important}
+body.navon .sheet.navopts .nav-panel{display:block!important}
+body.navon .btn-nav,body.navon .nav-tools{display:none}
+.navbar .nb-opts{border:0;background:var(--blue-light);color:var(--blue);border-radius:12px;padding:10px 14px;font-weight:800;font-family:inherit;font-size:15px;cursor:pointer}
+.navbar .nb-btns{display:flex;gap:6px}
 .sheet.collapsed .nav-card-bg{padding:10px 14px}
 .sheet.collapsed .btn-nav{margin-top:8px;padding:10px}
-.more-link{display:none;font-size:12.5px;color:var(--blue);font-weight:600;cursor:pointer;margin:6px 0 0;text-align:center}
-.sheet.collapsed .more-link{display:block}
+.more-link{display:none}
 .mic{background:none;border:0;padding:0;cursor:pointer;color:var(--text3);display:flex}
 .mic .ico{width:22px;height:22px}
 .mic.listening{color:var(--red);animation:pulse 1s infinite}
@@ -419,7 +422,7 @@ body.radar-on{--stack-h:46px}
 
 <div class="sheet collapsed" id="sheet">
   <div class="sheet-grip" id="sheetGrip" role="button" aria-label="הרחב או כווץ"></div>
-  <div class="navbar" id="navbar"><div class="nb"><div><b id="nbTime">—</b><small id="nbEta"></small></div><span id="nbDist"></span></div><button class="nb-stop" id="nbStop">עצור</button></div>
+  <div class="navbar" id="navbar"><div class="nb"><div><b id="nbTime">—</b><small id="nbEta"></small></div><span id="nbDist"></span></div><div class="nb-btns"><button class="nb-opts" id="nbOpts">אפשרויות</button><button class="nb-stop" id="nbStop">עצור</button></div></div>
   <div class="nav-panel" id="navPanel">
     <div class="route-modes seg">
       <button class="route-mode active" id="modeDrive" data-mode="driving-traffic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13.5 5.6 8.6A2 2 0 0 1 7.5 7.2h9a2 2 0 0 1 1.9 1.4L20 13.5"/><rect x="3" y="13.5" width="18" height="5" rx="1.5"/><circle cx="7.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/><circle cx="16.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/></svg>נסיעה</button>
@@ -437,7 +440,6 @@ body.radar-on{--stack-h:46px}
         <button class="nav-dismiss" id="navDismiss" aria-label="סגור"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       </div>
       <div class="seg" id="altSeg" style="display:none;margin-top:8px;font-size:12.5px"></div>
-      <div class="more-link" id="moreLink">אפשרויות מסלול ▴</div>
       <button class="btn-nav" id="btnNav"><span class="ico" style="display:inline-block;vertical-align:-5px;margin-inline-end:6px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 19.5 21 12 17l-7.5 4z"/></svg></span><span id="btnNavT">התחל ניווט</span></button>
     </div>
   </div>
@@ -839,23 +841,27 @@ const App={
     const none=()=>{c.innerHTML='';const d=document.createElement('div');d.className='result-row';const tx=document.createElement('div');tx.className='result-text';const a1=document.createElement('div');a1.className='result-name';a1.textContent='לא נמצאו תוצאות';tx.appendChild(a1);d.appendChild(tx);c.appendChild(d);c.classList.add('open')};
     try{
       let items=[];
+      const hasNum=/\d/.test(q);
+      const nomi=async(params)=>{const res=await timedFetch(`${NOMINATIM}/search?${params}&countrycodes=il&accept-language=he&format=jsonv2&addressdetails=1&limit=5`,8000,ac);if(res.status===429||res.status>=500)return[];const r=await res.json();return(Array.isArray(r)?r:[]).map(f=>{const a=f.address||{};const city=a.city||a.town||a.village||a.municipality||'';const road=a.road||a.pedestrian||'';const parts=(f.display_name||'').split(',').map(s=>s.trim()).filter(s=>s&&s!=='ישראל');let nm,ad;if(a.house_number&&road){nm=road+' '+a.house_number;ad=city}else if(f.name&&city&&f.name!==city){nm=f.name;ad=(road?road+', ':'')+city}else{nm=f.name||parts[0];ad=parts.slice(1,4).join(', ')}return{nm,ad,full:ad?nm+', '+ad:nm,lat:+f.lat,lng:+f.lon,exact:!!a.house_number}})};
+      /* כתובת עם מספר בית: OpenStreetMap (Nominatim) פותר כתובות בישראל נכון — «רוטשילד 25, נס ציונה» — ומפבוקס מתבלבל.
+         לכן עם מספר: קודם Nominatim (מובנה כשיש פסיק: רחוב, עיר), ואז מפבוקס כהשלמה. */
+      if(hasNum){
+        const parts=q.split(/[,،]/).map(s=>s.trim()).filter(Boolean);
+        if(parts.length>=2){try{items=await nomi(`street=${encodeURIComponent(parts[0])}&city=${encodeURIComponent(parts.slice(1).join(' '))}`)}catch(e){}}
+        if(!items.length){try{items=await nomi(`q=${encodeURIComponent(q)}`)}catch(e){}}
+        if(ac!==this._sc)return;
+      }
       if(USE_MAPBOX){
         const prox=this.pos?`&proximity=${this.pos.lng},${this.pos.lat}`:'';
         const r=await(await timedFetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=il&language=he&limit=5${prox}`,8000,ac)).json();
-        items=(r.features||[]).map(f=>({nm:(f.address?f.text+' '+f.address:f.text)||f.place_name.split(',')[0],ad:f.place_name.split(',').slice(1).join(', ').replace(/,\s*ישראל$/,''),full:f.place_name.replace(/,\s*ישראל$/,''),lat:f.center[1],lng:f.center[0],addr:(f.place_type||[]).includes('address')}));
-        // כתובת עם מספר בית שמפבוקס לא פתר ברמת הבית — משלימים מ־OpenStreetMap (Nominatim)
-        if(/\d/.test(q)&&!items.some(i=>i.addr)){
-          try{const res=await timedFetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=jsonv2&countrycodes=il&accept-language=he&limit=3&addressdetails=1`,6000,ac);const nr=await res.json();
-            const extra=(Array.isArray(nr)?nr:[]).filter(f=>f.address&&f.address.house_number).map(f=>{const a=f.address;const street=(a.road||'')+' '+a.house_number;const city=a.city||a.town||a.village||'';return{nm:street.trim(),ad:city,full:(street+', '+city).trim(),lat:+f.lat,lng:+f.lon,addr:true}});
-            items=[...extra,...items];
-          }catch(e){}
-        }
-      }else{
-        const res=await timedFetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=jsonv2&countrycodes=il&accept-language=he&limit=5`,8000,ac);
-        if(res.status===429||res.status>=500){this.toast('שירות החיפוש עמוס — נסה שוב בעוד רגע');return}
-        const r=await res.json();
-        items=(Array.isArray(r)?r:[]).map(f=>{const parts=(f.display_name||'').split(',').map(s=>s.trim()).filter(s=>s&&s!=='ישראל');return{nm:f.name||parts[0],ad:parts.slice(1,5).join(', '),full:parts.slice(0,5).join(', '),lat:+f.lat,lng:+f.lon}});
+        const mb=(r.features||[]).map(f=>({nm:(f.address?f.text+' '+f.address:f.text)||f.place_name.split(',')[0],ad:f.place_name.split(',').slice(1).join(', ').replace(/,\s*ישראל$/,''),full:f.place_name.replace(/,\s*ישראל$/,''),lat:f.center[1],lng:f.center[0]}));
+        for(const m of mb){if(!items.some(i=>this.dist(i.lat,i.lng,m.lat,m.lng)<60))items.push(m)}
+      }else if(!hasNum){
+        items=await nomi(`q=${encodeURIComponent(q)}`);
+      }else if(items.length<3){
+        try{const more=await nomi(`q=${encodeURIComponent(q)}`);for(const m of more){if(!items.some(i=>this.dist(i.lat,i.lng,m.lat,m.lng)<60))items.push(m)}}catch(e){}
       }
+      items=items.slice(0,6);
       if(ac!==this._sc)return;
       c.innerHTML='';
       if(!items.length){none();return}
@@ -931,7 +937,7 @@ const App={
         this._routes=r.routes;route=this._pick(r.routes);
       }
       if(stale())return;
-      if(!this._routes||!this._routes.length)this._routes=[route];
+      if(!this._routes||!this._routes.includes(route))this._routes=[route];   // מסלול הליכה או חלופה יחידה — לא לערבב עם מסלולי הנסיעה הקודמים
       this._routeFrom=from;this._applyRoute(route,walking);
       this._routeGeo=route.geometry;
       // Fit bounds — הריפוד לפי הגובה האמיתי של הלוח התחתון ושדה החיפוש
@@ -1079,7 +1085,7 @@ const App={
   },
   stopNav(){
     this._nav=false;
-    document.getElementById('turn').classList.remove('active');document.getElementById('alert').classList.remove('active');document.getElementById('searchArea').classList.remove('navhide');document.body.classList.remove('navon');
+    document.getElementById('turn').classList.remove('active');document.getElementById('alert').classList.remove('active');document.getElementById('sheet').classList.remove('navopts');document.getElementById('searchArea').classList.remove('navhide');document.body.classList.remove('navon');
     document.getElementById('btnNavT').textContent='התחל ניווט';
     try{if(this._wake){this._wake.release();this._wake=null}}catch(e){}
     try{speechSynthesis.cancel()}catch(e){}
@@ -1334,7 +1340,7 @@ const App={
     si.onsearch=()=>this.search(si.value);
     document.getElementById('searchGo').onclick=()=>this.search(si.value);
     document.getElementById('micBtn').onclick=()=>this.voiceSearch();
-    document.getElementById('moreLink').onclick=()=>document.getElementById('sheet').classList.remove('collapsed');
+    document.getElementById('nbOpts').onclick=()=>document.getElementById('sheet').classList.toggle('navopts');
     document.addEventListener('click',e=>{if(!e.target.closest('.search-area'))document.getElementById('resultsList').classList.remove('open')});
   }
 };
