@@ -1331,7 +1331,7 @@ const App={
     const c=this._routeGeo.coordinates;
     let best=1e9,me=0;for(let i=0;i<c.length;i++){const d=this.dist(this.pos.lat,this.pos.lng,c[i][1],c[i][0]);if(d<best){best=d;me=i}}
     const ahead=(idx)=>{let m=0;for(let i=me;i<idx&&i<c.length-1;i++)m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);return m};
-    for(const cam of (this._cams||[])){if(cam.warned||cam.idx<me)continue;const d=ahead(cam.idx);if(d<=320){cam.warned=true;const msg='מצלמת מהירות בעוד '+Math.round(d/10)*10+' מ׳'+(cam.maxspeed?' · מותר '+cam.maxspeed:'');this.showAlert(msg,false)}}
+    for(const cam of (this._cams||[])){if(cam.warned||cam.idx<me)continue;const d=ahead(cam.idx);if(d<=320){cam.warned=true;const msg=(d<60?'מצלמת מהירות ממש לפניך':'מצלמת מהירות בעוד '+Math.round(d/10)*10+' מטר')+(cam.maxspeed?' · מותר '+cam.maxspeed:'');this.showAlert(msg,false)}}
     const j=this._jamInfo();
     if(j&&!j.inside&&j.ahead<=1000&&j.dur>=45&&!this._jamSaid){this._jamSaid=true;this.showAlert((j.sev?'פקק כבד':'עומס תנועה')+' בעוד '+Math.round(j.ahead/50)*50+' מטר · '+this._fmtD(j.dist)+' · כ־'+Math.max(1,Math.round(j.dur/60))+' דקות',j.sev)}
     if(!j)this._jamSaid=false;
