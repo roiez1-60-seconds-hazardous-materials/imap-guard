@@ -1239,7 +1239,8 @@ const App={
   checkRoutes(){if(!this._nav||!this.pos||!this.dest)return;if(this._checking)return;this._checking=true;this._altStatus('בודק מסלולים מעודכנים…');Promise.resolve(this.fetchRoute({reason:'manual'})).finally(()=>{this._checking=false;if(document.getElementById('altStatus').textContent.startsWith('בודק'))this._altStatus('לא התקבלה תשובה — נסה שוב')})},
   _altStatus(t){const e=document.getElementById('altStatus');if(e)e.textContent=t},
   /* מהירות בפועל (GPS) מול המותרת (נתוני הכביש של מפבוקס/OSM לקטע שבו אנחנו). מעל המותר — אדום, ותזכורת קולית לכל היותר פעם ב־90 שנ׳ */
-  _updateSpeed(){const w=document.getElementById('speed');if(!w||!this.pos)return;const v=this.pos.spd>0?Math.round(this.pos.spd*3.6):0;
+  _updateSpeed(){const w=document.getElementById('speed');if(!w||!this.pos)return;
+    if(this.routeMode==='walking'){w.classList.remove('on','over');return}const v=this.pos.spd>0?Math.round(this.pos.spd*3.6):0;
     const m=this._ann&&this._ann.max&&this._ann.max[this._me];let lim=0;if(m&&!m.unknown&&m.speed>0){lim=m.unit==='mph'?Math.round(m.speed*1.609):m.speed}
     document.getElementById('spdNow').textContent=v;const L=document.getElementById('spdLim');L.textContent=lim||'';L.style.display=lim?'':'none';
     const over=lim>0&&v>lim;w.classList.toggle('over',over);w.classList.add('on');
@@ -1328,6 +1329,7 @@ const App={
   showAlert(msg,red){const a=document.getElementById('alert');document.getElementById('alertText').textContent=msg;a.classList.toggle('red',!!red);a.classList.add('active');clearTimeout(this._alT);this._alT=setTimeout(()=>a.classList.remove('active'),7000);this._say(msg);try{navigator.vibrate&&navigator.vibrate(red?[150,80,150]:[120,60,120])}catch(e){}},
   _checkAlerts(){
     if(!this._nav||!this.pos||!this._routeGeo)return;
+    if(this.routeMode==='walking'){document.getElementById('turnJam').classList.remove('on');return}
     const c=this._routeGeo.coordinates;
     let best=1e9,me=0;for(let i=0;i<c.length;i++){const d=this.dist(this.pos.lat,this.pos.lng,c[i][1],c[i][0]);if(d<best){best=d;me=i}}
     const ahead=(idx)=>{let m=0;for(let i=me;i<idx&&i<c.length-1;i++)m+=this.dist(c[i][1],c[i][0],c[i+1][1],c[i+1][0]);return m};
