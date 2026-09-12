@@ -1307,9 +1307,16 @@ const App={
       const c=(this._routeGeo||{}).coordinates;
       if(c&&c.length&&Date.now()-(this._overT||0)>9000){
         this._overT=Date.now();
-        const me=Math.max(0,(this._me||0)-1),rem=c.slice(me).length>1?c.slice(me):c;
-        const bnds=rem.reduce((bb,pt)=>bb.extend(pt),new GL.LngLatBounds(rem[0],rem[0]));
-        this.map.fitBounds(bnds,{padding:{top:Math.round(h*0.20)+90,bottom:Math.round(h*0.26),left:44,right:44},pitch:0,bearing:0,maxZoom:14,duration:900,essential:true});
+        const me=Math.max(0,(this._me||0)-1),rem=(c.length-me>1)?c.slice(me):c;
+        let w=180,so=90,e=-180,no=-90;for(const pt of rem){if(pt[0]<w)w=pt[0];if(pt[0]>e)e=pt[0];if(pt[1]<so)so=pt[1];if(pt[1]>no)no=pt[1]}
+        // חישוב מרכז+זום ידני (fitBounds של מפבוקס נכשל כשהמפה מוטה); עמיד לכל pitch
+        const W=this.map.getContainer().clientWidth,padT=Math.round(h*0.20)+90,padB=Math.round(h*0.26),padL=44,padR=44;
+        const aW=Math.max(50,W-padL-padR),aH=Math.max(50,h-padT-padB),merc=x=>Math.log(Math.tan(Math.PI/4+x*Math.PI/360));
+        if(isFinite(w)&&isFinite(e)&&e>w&&no>so){
+          const zL=Math.log2(aW*360/(512*(e-w))),zY=Math.log2(aH*2*Math.PI/(512*(merc(no)-merc(so))));
+          const z=Math.max(3,Math.min(14,Math.min(zL,zY)-0.15));
+          this.map.easeTo({center:[(w+e)/2,(so+no)/2],zoom:z,pitch:0,bearing:0,padding:{top:padT,bottom:padB,left:padL,right:padR},duration:900,essential:true});
+        }
       }
       const hd=(Number.isFinite(hdg)&&v>1)?hdg:(this.heading??0);if(this._carRot)this._carRot(hd);return;
     }
