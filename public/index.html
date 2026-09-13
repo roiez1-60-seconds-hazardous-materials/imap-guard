@@ -1092,8 +1092,29 @@ const App={
   },
 
   /* ═══ בחירת מסלול: המהיר לפי פקקים, או הקצר לפי אורך ═══ */
+  /* מהירות מותרת של קטע (מ‑OSM דרך מפבוקס), בקמ״ש; null אם לא ידועה */
+  _lim(m){if(!m||m.unknown||m.none||!m.speed)return null;return m.unit==='mph'?m.speed*1.609:m.speed},
+  /* מקדם מהירות לפי עומס: אין עומס → כמעט המהירות המותרת; פקק → הרבה פחות */
+  _cong2mult(c){return c==='severe'?0.27:c==='heavy'?0.42:c==='moderate'?0.62:1.0},
+  /* זמן קטע מציאותי: לפי המהירות המותרת מוקטנת בעומס. בכבישים מהירים מתקנים את ההערכה השמרנית של מפבוקס;
+     בעיר (מגבלה<70) לא מרשים אופטימיות יתר — לא מהיר יותר ממה שמפבוקס עצמו נותן */
+  _segSecs(d,md,lim,cong){
+    if(!(d>0))return md||0;
+    if(lim==null)return md||d/13.9;                 // אין מגבלה ידועה → אמון במפבוקס
+    const eff=(lim/3.6)*this._cong2mult(cong),tl=eff>0?d/eff:md;
+    return lim>=70?tl:Math.max(tl,md||0);           // כביש מהיר → לפי המגבלה; עיר → הזהיר מבין השניים
+  },
+  /* זמן נסיעה מכויל למסלול שלם */
+  _ette(route){
+    if(!route)return 0;
+    if(this.routeMode==='walking')return route.duration;
+    let t=0,ok=false;
+    for(const l of (route.legs||[])){const n=l.annotation||{};const dur=n.duration||[],dist=n.distance||[],mx=n.maxspeed||[],cg=n.congestion||[];
+      if(dur.length&&dist.length){ok=true;for(let i=0;i<dist.length;i++)t+=this._segSecs(dist[i],dur[i],this._lim(mx[i]),cg[i])}}
+    return ok?t:route.duration;
+  },
   _pick(routes){
-    const fast=routes.reduce((a,b)=>b.duration<a.duration?b:a),short=routes.reduce((a,b)=>b.distance<a.distance?b:a);
+    const fast=routes.reduce((a,b)=>this._ette(b)<this._ette(a)?b:a),short=routes.reduce((a,b)=>b.distance<a.distance?b:a);
     return (this._routePref==='short')?short:fast;   // בחלופה שאינה המהירה/הקצרה חוזרים למהיר בחישוב מחדש
   },
   /* חישוב חי בזמן ניווט: אותו מסלול עם פקקים מעודכנים — בשקט; מסלול מהיר יותר ב־2 דק׳ ומעלה — מודיעים ועוברים; ירדנו מהמסלול — מחשבים מחדש */
@@ -1105,7 +1126,7 @@ const App={
       /* לא מחליפים מסלול על כל שיפור קטן (רועי: שלא יטריד): רק חיסכון של 5 דק׳ ומעלה ולפחות 15% מהזמן שנותר,
          שמחזיק בשתי בדיקות רצופות (דקה זו אחר זו), לא בתוך 1.5 ק״מ לפני פנייה, ולא יותר מפעם ב־10 דק׳ (אלא אם החיסכון 10 דק׳+).
          חיסכון של 3–5 דק׳ מקבל הודעה שקטה אחת, בלי קול — המסלול המהיר מופיע באפשרויות */
-      const now=Date.now(),save=same.duration-best.duration,big=save>=Math.max(300,0.15*same.duration),huge=save>=600,nearTurn=(this._dNext||1e9)<1500;
+      const st=this._ette(same),bt=this._ette(best),now=Date.now(),save=st-bt,big=save>=Math.max(300,0.15*st),huge=save>=600,nearTurn=(this._dNext||1e9)<1500;
       if(best!==same&&big&&!nearTurn){
         this._betterN=(this._betterN||0)+1;
         const cool=now-(this._switchT||0)<600000&&!huge;
@@ -1148,7 +1169,7 @@ const App={
     if(!walking&&rs.length>1){
       seg.style.display='flex';
       const opts=[];opts.push({r:fast,l:'המהיר'});if(short!==fast)opts.push({r:short,l:'הקצר'});for(const r of rs){if(opts.length>=3)break;if(!opts.some(o=>o.r===r))opts.push({r,l:'חלופה'})}
-      for(const o of opts){const b=document.createElement('button');const dm=Math.round((route.duration-o.r.duration)/60);b.textContent=`${o.l} ${this._fmtT(o.r.duration)} · ${this._fmtD(o.r.distance)}`+(o.r!==route&&this._nav?(dm>0?` · חוסך ${dm} דק׳`:dm<0?` · +${-dm} דק׳`:''):'');b.classList.toggle('on',o.r===route);b.onclick=()=>{this._routePref=o.r===fast?'fast':o.r===short?'short':'alt';this._applyRoute(o.r,walking);this.updateNavInfo()};seg.appendChild(b)}
+      for(const o of opts){const b=document.createElement('button');const dm=Math.round((this._ette(route)-this._ette(o.r))/60);b.textContent=`${o.l} ${this._fmtT(this._ette(o.r))} · ${this._fmtD(o.r.distance)}`+(o.r!==route&&this._nav?(dm>0?` · חוסך ${dm} דק׳`:dm<0?` · +${-dm} דק׳`:''):'');b.classList.toggle('on',o.r===route);b.onclick=()=>{this._routePref=o.r===fast?'fast':o.r===short?'short':'alt';this._applyRoute(o.r,walking);this.updateNavInfo()};seg.appendChild(b)}
     }else seg.style.display='none';
     // מספרים
     const coords=route.geometry.coordinates;
@@ -1159,7 +1180,7 @@ const App={
     }
     document.getElementById('navDistance').textContent=this._fmtD(route.distance).replace(' מ׳',' מטר');
     const hasCong=(route.legs||[]).some(l=>l.annotation&&l.annotation.congestion);
-    document.getElementById('navTime').textContent=this._fmtT(route.duration).replace('דק׳','דקות')+(walking?' הליכה':hasCong?' נסיעה · לפי פקקים':' נסיעה');
+    document.getElementById('navTime').textContent=this._fmtT(walking?route.duration:this._ette(route)).replace('דק׳','דקות')+(walking?' הליכה':hasCong?' נסיעה · לפי פקקים':' נסיעה');
     if(this._nav)this._navTick();
   },
   /* מרחק מצטבר לאורך הקו, תחילת כל צעד על הקו, ונתוני הזמן/עומס לכל קטע */
@@ -1224,7 +1245,7 @@ const App={
   _remaining(){
     const c=(this._routeGeo||{}).coordinates;if(!c||!this.pos||!this._cum)return null;const q=this._locate();if(!q)return null;
     const rem=Math.max(0,this._cum[c.length-1]-q.along);let time;
-    if(this._ann){let t=0;for(let i=q.me;i<this._ann.dur.length;i++)t+=this._ann.dur[i];const seg=this._cum[q.me+1]-this._cum[q.me];if(seg>0)t-=this._ann.dur[q.me]*Math.min(1,(q.along-this._cum[q.me])/seg);time=Math.max(0,t)}
+    if(this._ann){let t=0;const A=this._ann;for(let i=q.me;i<A.dur.length;i++){let st=this._segSecs(A.dist[i],A.dur[i],this._lim(A.max&&A.max[i]),A.cong[i]);if(i===q.me){const seg=this._cum[q.me+1]-this._cum[q.me];if(seg>0)st*=1-Math.min(1,(q.along-this._cum[q.me])/seg)}t+=st}time=Math.max(0,t)}
     else{const rs=(this._routes||[]);const r=rs.find(x=>x.geometry===this._routeGeo)||rs[0];time=r&&r.distance>0?r.duration*rem/r.distance:0}
     return{dist:rem,time};
   },
