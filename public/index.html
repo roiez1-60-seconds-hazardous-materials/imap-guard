@@ -1094,23 +1094,29 @@ const App={
   /* ═══ בחירת מסלול: המהיר לפי פקקים, או הקצר לפי אורך ═══ */
   /* מהירות מותרת של קטע (מ‑OSM דרך מפבוקס), בקמ״ש; null אם לא ידועה */
   _lim(m){if(!m||m.unknown||m.none||!m.speed)return null;return m.unit==='mph'?m.speed*1.609:m.speed},
-  /* מקדם מהירות לפי עומס: אין עומס → כמעט המהירות המותרת; פקק → הרבה פחות */
-  _cong2mult(c){return c==='severe'?0.27:c==='heavy'?0.42:c==='moderate'?0.62:1.0},
-  /* זמן קטע מציאותי: לפי המהירות המותרת מוקטנת בעומס. בכבישים מהירים מתקנים את ההערכה השמרנית של מפבוקס;
-     בעיר (מגבלה<70) לא מרשים אופטימיות יתר — לא מהיר יותר ממה שמפבוקס עצמו נותן */
-  _segSecs(d,md,lim,cong){
-    if(!(d>0))return md||0;
-    if(lim==null)return md||d/13.9;                 // אין מגבלה ידועה → אמון במפבוקס
-    const eff=(lim/3.6)*this._cong2mult(cong),tl=eff>0?d/eff:md;
-    return lim>=70?tl:Math.max(tl,md||0);           // כביש מהיר → לפי המגבלה; עיר → הזהיר מבין השניים
+  /* זמן מכויל לכל קטע: משלימים מגבלה מקטע שכן (השלמה קדימה ואחורה); בכביש מהיר פנוי לוקחים את המהיר
+     מבין מפבוקס ל‑90% מהמגבלה (מתקן את ההערכה השמרנית של מפבוקס במהירים); בעומס ובעיר סומכים על מפבוקס */
+  _calibArr(dur,dist,mx,cg){
+    const n=dist.length,lim=new Array(n);
+    for(let i=0;i<n;i++)lim[i]=this._lim(mx&&mx[i]);
+    let last=null;for(let i=0;i<n;i++){if(lim[i]!=null)last=lim[i];else if(last!=null)lim[i]=last}
+    let nxt=null;for(let i=n-1;i>=0;i--){if(lim[i]!=null)nxt=lim[i];else if(nxt!=null)lim[i]=nxt}
+    const out=new Array(n);
+    for(let i=0;i<n;i++){const d=dist[i],md=dur[i]||0,l=lim[i],c=cg&&cg[i];
+      if(!(d>0)){out[i]=md;continue}
+      if(l==null){out[i]=md||d/13.9;continue}
+      const free=(c==null||c==='low'||c==='unknown');
+      out[i]=(l>=70&&free)?Math.min(md||1e9,d/((l*0.9)/3.6)):md;
+    }
+    return out;
   },
   /* זמן נסיעה מכויל למסלול שלם */
   _ette(route){
     if(!route)return 0;
     if(this.routeMode==='walking')return route.duration;
     let t=0,ok=false;
-    for(const l of (route.legs||[])){const n=l.annotation||{};const dur=n.duration||[],dist=n.distance||[],mx=n.maxspeed||[],cg=n.congestion||[];
-      if(dur.length&&dist.length){ok=true;for(let i=0;i<dist.length;i++)t+=this._segSecs(dist[i],dur[i],this._lim(mx[i]),cg[i])}}
+    for(const l of (route.legs||[])){const n=l.annotation||{};const dur=n.duration||[],dist=n.distance||[];
+      if(dur.length&&dist.length){ok=true;const secs=this._calibArr(dur,dist,n.maxspeed||[],n.congestion||[]);for(const x of secs)t+=x}}
     return ok?t:route.duration;
   },
   _pick(routes){
@@ -1189,7 +1195,7 @@ const App={
     let k=0;const starts=(route._steps||[]).map(s=>{if(!s.loc)return k;let best=1e9,bi=k;for(let i=k;i<c.length;i++){const d=this.dist(s.loc[1],s.loc[0],c[i][1],c[i][0]);if(d<best){best=d;bi=i}if(d<1)break}k=bi;return bi});
     this._cum=cum;this._starts=starts;this._me=0;this._along=0;this._off=null;this._offCnt=0;
     const a={dur:[],dist:[],cong:[],max:[]};for(const l of (route.legs||[])){const n=l.annotation||{};a.dur.push(...(n.duration||[]));a.dist.push(...(n.distance||[]));a.cong.push(...(n.congestion||[]));a.max.push(...(n.maxspeed||[]))}
-    this._ann=(a.dur.length===c.length-1&&a.dist.length===c.length-1)?a:null;this._cong=a.cong;
+    this._ann=(a.dur.length===c.length-1&&a.dist.length===c.length-1)?a:null;if(this._ann)this._ann.secs=this._calibArr(a.dur,a.dist,a.max,a.cong);this._cong=a.cong;
   },
   /* המיקום על הקו: הקודקוד הקרוב (חיפוש בחלון סביב הקודם) והטלה על הקטע — כדי שהמרחק לפנייה יהיה רציף */
   _locate(){
@@ -1245,7 +1251,7 @@ const App={
   _remaining(){
     const c=(this._routeGeo||{}).coordinates;if(!c||!this.pos||!this._cum)return null;const q=this._locate();if(!q)return null;
     const rem=Math.max(0,this._cum[c.length-1]-q.along);let time;
-    if(this._ann){let t=0;const A=this._ann;for(let i=q.me;i<A.dur.length;i++){let st=this._segSecs(A.dist[i],A.dur[i],this._lim(A.max&&A.max[i]),A.cong[i]);if(i===q.me){const seg=this._cum[q.me+1]-this._cum[q.me];if(seg>0)st*=1-Math.min(1,(q.along-this._cum[q.me])/seg)}t+=st}time=Math.max(0,t)}
+    if(this._ann&&this._ann.secs){let t=0;const A=this._ann;for(let i=q.me;i<A.secs.length;i++){let st=A.secs[i];if(i===q.me){const seg=this._cum[q.me+1]-this._cum[q.me];if(seg>0)st*=1-Math.min(1,(q.along-this._cum[q.me])/seg)}t+=st}time=Math.max(0,t)}
     else{const rs=(this._routes||[]);const r=rs.find(x=>x.geometry===this._routeGeo)||rs[0];time=r&&r.distance>0?r.duration*rem/r.distance:0}
     return{dist:rem,time};
   },
